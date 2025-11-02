@@ -1,0 +1,67 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* Import Tailwind */
+@import "tailwindcss";
+
+/* =====================
+   🧭 THEME CONFIGURATION
+   ===================== */
+@theme {
+  /* 🎨 COLORS */
+  --color-primary: #041643;
+  --color-primary-light: #0A2471;
+  --color-primary-dark: #020B29;
+  --color-light: #3f3f3f
+
+  /* 🌈 You can still use default Tailwind colors */
+  --color-red-500: #ef4444;
+  --color-green-500: #22c55e;
+  --color-gray-100: #f3f4f6;
+  --color-gray-900: #111827;
+
+  /* 📱 BREAKPOINTS */
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* 🖋️ FONT */
+  --font-sans: "Inter", sans-serif;
+
+
+}
+
+/* ===========================
+   🌐 Global Custom Styles
+   =========================== */
+[style*="--icon-url"]::before {
+  background-image: var(--icon-url);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+/* =====================
+   🧩 BASE STYLES
+   ===================== */
+:root {
+  font-family: var(--font-sans); /* ✅ Must use var() */
+  color-scheme: light dark; /* ✅ not 'primary' */
+}
+
+
+
+.wrapper{
+  @apply w-full max-w-[1400px] block mx-auto
+}
+
+.before{
+
+  @apply relative before:content-[''] before:absolute 
+  before:left-[-460px] before:top-1/2 before:-translate-y-1/2 
+  before:w-full before:h-full before:pointer-events-none;
+
+}
