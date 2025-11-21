@@ -1,6 +1,6 @@
 // src/api/conversation.ts
 import api from "@/services/axiosInstance";
-import { Conversation, CreateConversationData } from "@/features/chat/types/conversationTypes";
+import { Conversation, CreateConversationData, ConversationsResponse} from "@/features/chat/types/conversationTypes";
 
 export const createConversation = async (
   data: CreateConversationData
@@ -9,8 +9,8 @@ export const createConversation = async (
   return res.data;
 };
 
-export const getConversations = async (): Promise<Conversation[]> => {
-  const res = await api.get<Conversation[]>("/conversations");
+export const getConversations = async (): Promise<ConversationsResponse> => {
+  const res = await api.get<ConversationsResponse>("/conversations");
   return res.data;
 };
 

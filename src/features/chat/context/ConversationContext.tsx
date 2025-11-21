@@ -20,10 +20,7 @@ export interface ConversationContextProps {
   markConversationAsRead: (id: string) => void;
 }
 
-export const ConversationContext = createContext<
-  ConversationContextProps | undefined
->(undefined);
-
+export const ConversationContext = createContext< ConversationContextProps | undefined >(undefined);
 export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -32,28 +29,43 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
 
-  // ✅ Fetch via REST API (initial load)
+  //  Fetch via REST API (initial load)
   const refreshConversations = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const data = await getConversations();
-      console.log("✅ [Conversation] Conversations fetched:", data);
-      setConversations(
-        data.map((c) => ({
-          ...c,
-          unreadCount: c.unreadCount || 0,
-        }))
-      );
-      setHasFetched(true);
-    } catch (error) {
-      console.error("Failed to load conversations:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!user) return;
+  setLoading(true);
+  try {
+    const data = await getConversations();
 
-  // ✅ Create new conversation (REST + Socket)
+    console.groupCollapsed("🪲 [Conversation Debug] refreshConversations");
+    console.log("User ID:", user?._id);
+    console.log("Raw response from getConversations():", data);
+    console.groupEnd();
+
+    //  Extract the arrays from the response
+    const allConversations = [
+      ...(data.conversations || []),
+      ...(data.groupChats || []),
+    ];
+
+    console.log(" Combined conversations count:", allConversations.length);
+
+    //  Safely update state
+    setConversations(
+      allConversations.map((c) => ({
+        ...c,
+        unreadCount: c.unreadCount || 0,
+      }))
+    );
+
+    setHasFetched(true);
+  } catch (error) {
+    console.error("Failed to load conversations:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  //  Create new conversation (REST + Socket)
   const createNewConversation = async (data: CreateConversationData) => {
     try {
       const newConv = await createConversation(data);
@@ -67,7 +79,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // ✅ Delete conversation (REST + Socket)
+  //  Delete conversation (REST + Socket)
   const removeConversation = async (id: string) => {
     try {
       await deleteConversation(id);
@@ -81,7 +93,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // ✅ Mark as read (UI-only)
+  //  Mark as read (UI-only)
   const markConversationAsRead = (id: string) => {
     setConversations((prev) =>
       prev.map((conv) =>
@@ -90,7 +102,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  // ✅ Socket setup + listeners
+  // Socket setup + listeners
   useEffect(() => {
     if (!user) return;
 
