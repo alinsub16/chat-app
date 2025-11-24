@@ -33,6 +33,7 @@ useEffect(() => {
     try {
       if (token) {
         const profile = await getProfile();
+        console.log("PROFILE RESULT:", user?._id);
         setUser(profile);
       } else {
         setUser(null);
@@ -90,7 +91,9 @@ const register = async (data: RegisterData) => {
   const refreshProfile = async () => {
     try {
       const profile = await getProfile();
+      
       setUser(profile);
+ 
     } catch {
       logout();
     }
