@@ -8,6 +8,10 @@ export interface User {
   phoneNumber: string;
   profilePicture?: string;
 }
+export interface ProfileResponse {
+  message: string;
+  user: User;
+}
 
 export interface RegisterData {
   firstName: string;

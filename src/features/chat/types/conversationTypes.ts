@@ -13,8 +13,7 @@ export interface Conversation {
   groupChats:string[] | null;
 }
 export interface ConversationsResponse {
-  conversations: Conversation[];
-  groupChats: Conversation[];
+  chats: Conversation[];
 }
    
 export interface CreateConversationData {

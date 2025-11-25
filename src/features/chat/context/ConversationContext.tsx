@@ -43,20 +43,12 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
     console.groupEnd();
 
     //  Extract the arrays from the response
-    const allConversations = [
-      ...(data.conversations || []),
-      ...(data.groupChats || []),
-    ];
+    const allConversations = data.chats || [];
 
     console.log(" Combined conversations count:", allConversations.length);
 
     //  Safely update state
-    setConversations(
-      allConversations.map((c) => ({
-        ...c,
-        unreadCount: c.unreadCount || 0,
-      }))
-    );
+    setConversations(allConversations);
 
     setHasFetched(true);
   } catch (error) {

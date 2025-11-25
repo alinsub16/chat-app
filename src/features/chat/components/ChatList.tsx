@@ -5,7 +5,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const ChatList = () => {
   const { conversations, loading } = useConversation();
-  const { user } = useAuth(); // current logged-in user
+  const { user ,refreshProfile} = useAuth(); // current logged-in user
 
   if (loading) {
     return <div className="text-gray-400 p-4">Loading chats...</div>;
@@ -22,14 +22,14 @@ const ChatList = () => {
   return (
     <div className="w-[320px] h-screen bg-black text-white overflow-y-auto p-2">
     
-      {conversations.map((conv) => {
+      {conversations.map((conv) => {   
       const participants = conv.participants || [];
     // Get the user that is NOT you
-    const otherUser = participants.find(
-  (p) => String(p?._id) !== String(user?._id)
-);
+    const otherUser = participants.find( (p) => String(p?._id) !== String(user?._id) );
+    
     // console.log("participant ids:", participants.map(p => p._id));
-console.log("user id:", user?._id);
+    console.log("PROFILE RESULT:", user);
+console.log("user id:",  otherUser);
 // console.log("types:", participants.map(p => typeof p._id), typeof user?._id);
     // Full name
     const fullName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : "Unknown User";

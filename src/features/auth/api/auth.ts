@@ -1,6 +1,6 @@
 // src/api/auth.ts
 import api from "@services/axiosInstance";
-import { User, RegisterData, LoginData, AuthResponse } from "@/features/auth/types/auth";
+import { User, RegisterData, LoginData, AuthResponse,ProfileResponse } from "@/features/auth/types/auth";
 
 // Register
 export const registerUser = async (data: RegisterData): Promise<AuthResponse> => {
@@ -15,8 +15,8 @@ export const loginUser = async (data: LoginData): Promise<AuthResponse> => {
 };
 
 // Get logged-in user
-export const getProfile = async (): Promise<User> => {
-  const res = await api.get<User>("/auth/profile");
+export const getProfile = async (): Promise<ProfileResponse> => {
+  const res = await api.get<ProfileResponse>("/auth/profile");
   return res.data;
 };
 
