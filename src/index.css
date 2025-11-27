@@ -57,6 +57,9 @@
 .wrapper{
   @apply w-full max-w-[1400px] block mx-auto
 }
+.messages-wrapper{
+  @apply w-full max-w-[1100px] block mx-auto
+}
 
 .before{
 

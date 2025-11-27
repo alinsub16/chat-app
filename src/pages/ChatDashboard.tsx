@@ -1,6 +1,7 @@
 import React from 'react'
 import Sidebar from '@/components/layout/Sidebar'
-import ChatList from '@/features/chat/components/ChatList'
+import ChatList from '@/features/chat/layout/ChatList'
+import ChatBoard from '@features/chat/layout/ChatBoard'
 
 const ChatDashboard = () => {
   return (
@@ -8,8 +9,9 @@ const ChatDashboard = () => {
       <div className='float-left'>
         <Sidebar/>
       </div>
-      <div>
+      <div className='flex justify-start'>
           <ChatList/>
+          <ChatBoard />
       </div>
     </div>
   )

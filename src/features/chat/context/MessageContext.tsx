@@ -17,14 +17,10 @@ export interface MessageContextType {
   refreshMessages: () => Promise<void>;
 }
 
-/** ---------------------------
- *  Create Context
- * --------------------------- */
+//  Create Context
 export const MessageContext = createContext<MessageContextType | undefined>(undefined);
 
-/** ---------------------------
- *  Provider
- * --------------------------- */
+//  Provider
 export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
