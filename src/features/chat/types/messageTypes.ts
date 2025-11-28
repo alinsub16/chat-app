@@ -1,24 +1,31 @@
-import { User } from "@/features/auth/types/auth";
+export interface Sender {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 export interface Message {
   _id: string;
-  chat: string | null;
   content: string;
-  messageType: "text" | "image" | "video" | "file";
-  attachments: string[];
-  readBy: string[];
+  sender: Sender; 
+  conversationId: string | null;
+  chatId?: string | null;
+  messageType: string;
+  attachments: any[];
+  readBy: any[];
   createdAt: string;
   updatedAt: string;
 }
+
 export interface SendMessageData {
-  chatId: string;
+  conversationId: string;
   content: string;
-  messageType: "text" | "image" | "video" | "file";
-  attachments?: string[];
+  senderId: string;
 }
 
 export interface UpdateMessageData {
-  conversationid:string | null;
-  chatId: string | null;
   content?: string;
+  messageType?: string;
+  attachments?: any[];
 }

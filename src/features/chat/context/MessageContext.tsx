@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, } from "react";
 import { sendMessage, getChatMessages, deleteChatMessages, updateChatMessage, } from "@/features/chat/api/messageApi";
 import { Message, SendMessageData, UpdateMessageData, } from "@/features/chat/types/messageTypes";
 
@@ -9,31 +9,31 @@ export interface MessageContextType {
   messages: Message[];
   loading: boolean;
   activeChatId: string | null;
-  fetchMessages: (chatId: string) => Promise<void>;
+  fetchMessages: (conversationId: string) => Promise<void>;
   sendNewMessage: (data: SendMessageData) => Promise<void>;
   updateMessage: (messageId: string, data: UpdateMessageData) => Promise<void>;
-  clearMessages: (chatId: string) => Promise<void>;
-  setActiveChat: (chatId: string | null) => void;
+  clearMessages: (conversationId: string) => Promise<void>;
+  setActiveChat: (conversationId: string | null) => void;
   refreshMessages: () => Promise<void>;
 }
 
-//  Create Context
-export const MessageContext = createContext<MessageContextType | undefined>(undefined);
+export const MessageContext = createContext<MessageContextType | undefined>( undefined );
 
-//  Provider
-export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ children, }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
-  /** Fetch all messages for a given chat */
-  const fetchMessages = useCallback(async (chatId: string) => {
-    if (!chatId) return;
+  /** Fetch all messages in a conversation */
+  const fetchMessages = useCallback(async (conversationId: string) => {
+    if (!conversationId) return;
+
     setLoading(true);
     try {
-      const data = await getChatMessages(chatId);
+      const data = await getChatMessages(conversationId);
+      console.log("📥 FETCHED MESSAGES:", data);
       setMessages(data);
-      setActiveChatId(chatId);
+      setActiveChatId(conversationId);
     } catch (error) {
       console.error("Failed to fetch messages:", error);
     } finally {
@@ -41,51 +41,56 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, []);
 
-  /** Send a new message */
-  const sendNewMessage = useCallback(async (data: SendMessageData) => {
-    try {
-      const newMsg = await sendMessage(data);
-      // Append new message only if it's for the current chat
-      if (activeChatId === newMsg.chat) {
-        setMessages((prev) => [...prev, newMsg]);
+  /** Send message */
+  const sendNewMessage = useCallback(
+    async (data: SendMessageData) => {
+      try {
+        const newMsg = await sendMessage(data);
+
+        // Backend returns: conversationId
+        if (newMsg.conversationId === activeChatId) {
+          setMessages((prev) => [...prev, newMsg]);
+        }
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error(" Failed to send message:", error);
-      throw error;
-    }
-  }, [activeChatId]);
+    },
+    [activeChatId]
+  );
 
-  /** Update a message (edit or mark as read) */
-  const updateMessage = useCallback(async (messageId: string, data: UpdateMessageData) => {
-    try {
-      const updatedMsg = await updateChatMessage(messageId, data);
-      setMessages((prev) =>
-        prev.map((msg) => (msg._id === updatedMsg._id ? updatedMsg : msg))
-      );
-    } catch (error) {
-      console.error(" Failed to update message:", error);
-      throw error;
-    }
-  }, []);
+  /** Update message */
+  const updateMessage = useCallback(
+    async (messageId: string, data: UpdateMessageData) => {
+      try {
+        const updated = await updateChatMessage(messageId, data);
+        setMessages((prev) =>
+          prev.map((msg) => (msg._id === updated._id ? updated : msg))
+        );
+      } catch (error) {
+        console.error("Failed to update message:", error);
+        throw error;
+      }
+    },
+    []
+  );
 
-  /** Delete all messages in a chat */
-  const clearMessages = useCallback(async (chatId: string) => {
-    try {
-      await deleteChatMessages(chatId);
-      if (chatId === activeChatId) setMessages([]);
-    } catch (error) {
-      console.error("Failed to delete chat messages:", error);
-    }
-  }, [activeChatId]);
+  /** Clear all messages */
+  const clearMessages = useCallback(
+    async (conversationId: string) => {
+      try {
+        await deleteChatMessages(conversationId);
+        if (activeChatId === conversationId) setMessages([]);
+      } catch (error) {
+        console.error("Failed to delete chat messages:", error);
+      }
+    },
+    [activeChatId]
+  );
 
-  /** Refresh current chat messages */
+  /** Refresh current chat */
   const refreshMessages = useCallback(async () => {
     if (activeChatId) await fetchMessages(activeChatId);
-  }, [activeChatId, fetchMessages]);
-
-  /** Auto-fetch messages when chatId changes */
-  useEffect(() => {
-    if (activeChatId) fetchMessages(activeChatId);
   }, [activeChatId, fetchMessages]);
 
   return (
@@ -107,5 +112,11 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 };
 
-
-
+/** Custom hook */
+export const useMessages = () => {
+  const context = useContext(MessageContext);
+  if (!context) {
+    throw new Error("useMessages must be used inside MessageProvider");
+  }
+  return context;
+};
