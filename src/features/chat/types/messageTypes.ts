@@ -1,3 +1,5 @@
+import { User } from "@/features/auth/types/auth";
+
 export interface Sender {
   _id: string;
   firstName: string;
@@ -8,7 +10,7 @@ export interface Sender {
 export interface Message {
   _id: string;
   content: string;
-  sender: Sender; 
+  sender: User; 
   conversationId: string | null;
   chatId?: string | null;
   messageType: string;

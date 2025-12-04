@@ -24,22 +24,23 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [loading, setLoading] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
-  /** Fetch all messages in a conversation */
-  const fetchMessages = useCallback(async (conversationId: string) => {
+ /** FETCH messages for a conversation */
+  const fetchMessages = async (conversationId: string) => {
     if (!conversationId) return;
-
     setLoading(true);
     try {
       const data = await getChatMessages(conversationId);
-      console.log("📥 FETCHED MESSAGES:", data);
-      setMessages(data);
+      // Important: backend returns object, convert to array
+      const safeData = Array.isArray(data) ? data : [data];
+      setMessages(safeData);
       setActiveChatId(conversationId);
+
     } catch (error) {
-      console.error("Failed to fetch messages:", error);
+      console.error("❌ Failed to fetch messages:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   /** Send message */
   const sendNewMessage = useCallback(

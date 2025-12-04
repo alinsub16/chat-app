@@ -9,8 +9,9 @@ export const sendMessage = async (data: SendMessageData): Promise<Message> => {
 
 // Get all messages in a chat
 export const getChatMessages = async (conversationId: string): Promise<Message[]> => {
-  const res = await api.get<Message[]>(`/messages/${conversationId}`);
-  return res.data;
+  const res = await api.get(`/messages/${conversationId}`);
+  return Array.isArray(res.data) ? res.data : [res.data];
+  
 };
 
 // Delete all messages in a chat

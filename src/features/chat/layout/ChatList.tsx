@@ -2,9 +2,11 @@ import React from "react";
 import ChatListItem from "@/features/chat/components/ChatListItem";
 import { useConversation } from "@/features/chat/hooks/useConversation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useMessages } from "@features/chat/hooks/useMessage";
 
 const ChatList = () => {
   const { conversations, loading } = useConversation();
+  const { fetchMessages } = useMessages();
   const { user} = useAuth(); 
 
   if (loading) {
@@ -42,6 +44,7 @@ const ChatList = () => {
           name={conv.chatName || fullName || "null"}
           message={conv.latestMessage?.content || "No messages yet"}
           time={ conv.latestMessage ? new Date(conv.latestMessage.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "" }
+          onClick={()=> { fetchMessages(conv._id) }}
         />
       );
     })}

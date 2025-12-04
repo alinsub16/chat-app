@@ -12,11 +12,8 @@ interface Message {
 
 const Chat: React.FC = () => {
   const [input, setInput] = useState("");
-  const { messages, sendNewMessage } = useMessages(); // assuming your hook returns addMessage
+  const { messages} = useMessages(); // assuming your hook returns addMessage
   const {user} = useAuth();
-  useEffect(() => {
-  console.log("📝 CURRENT MESSAGES STATE:", messages);
-}, [messages]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -51,10 +48,7 @@ const Chat: React.FC = () => {
             key={msg._id}
             message={msg.content}
             sender={msg.sender._id === user?._id ? "user" : "other"}
-            timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            timestamp={new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", })}
           />
         ))}
       </div>

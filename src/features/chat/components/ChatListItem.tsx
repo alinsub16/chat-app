@@ -8,12 +8,14 @@ interface ChatListItemProps {
   message: string;
   time: string;
   unread?: boolean | string;
+  onClick?: () => void;
 }
 
-const ChatListItem: React.FC<ChatListItemProps> = ({ avatar,initialName, name, message, time, unread = false, }) => {
+const ChatListItem: React.FC<ChatListItemProps> = ({ avatar,initialName, name, message, time, unread = false,onClick, }) => {
   return (
     <div
       className="flex items-center justify-between px-3 py-2 hover:bg-gray-800 transition cursor-pointer rounded-lg"
+      onClick={onClick}
     >
       {/* Left section: avatar + text */}
       <div className="flex items-center gap-3">
