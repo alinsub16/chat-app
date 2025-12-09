@@ -7,22 +7,25 @@ interface LinkPreview {
 }
 
 interface ChatMessageProps {
+  name:string;
   message: string;
   sender: "user" | "other";
   timestamp?: string;
   linkPreview?: LinkPreview;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, timestamp, linkPreview }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ name, message, sender, timestamp, linkPreview }) => {
   return (
     <div className={`flex ${sender === "user" ? "justify-end" : "justify-start"} mb-4`}>
-      <div className={`max-w-xs p-3 rounded-lg break-words
-        ${sender === "user" ? "bg-purple-600 text-white" : "bg-gray-800 text-gray-200"}`}>
+      <div className="max-w-xs " >
+        <p className="text-gray-400 text-sm">{name}</p>
+        <div className={`p-3 rounded-lg ${sender === "user" ? "bg-purple-600 text-white" : "bg-gray-800 text-gray-200"}`}>
+        {timestamp && <span className="text-xs text-gray-400 mb-1">{timestamp}</span>}
+        <span className="block">{message}</span>
+        </div>
         
-        {timestamp && <div className="text-xs text-gray-400 mb-1">{timestamp}</div>}
-        <div>{message}</div>
       </div>
-    </div>
+    </div> 
   );
 };
 

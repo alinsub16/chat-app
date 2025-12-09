@@ -3,15 +3,10 @@ import React from "react";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   variant?: "default" | "green";
+  text?: string;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  isLoading,
-  variant = "default",
-  className = "",
-  ...props
-}) => {
+export const Button: React.FC<ButtonProps> = ({ text,children, isLoading, variant = "default", className = "", ...props }) => {
   const variants = {
     default:
       "px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200",
@@ -26,6 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={isLoading || props.disabled}
     >
       {isLoading ? "Loading..." : children}
+      {text}
     </button>
   );
 };

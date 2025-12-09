@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import ChatMessage from "@features/chat/components/ChatMessage";
 import { useMessages } from "@features/chat/hooks/useMessage";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { console } from "inspector";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { send } from "process";
 
 interface Message {
   _id?: string;
@@ -12,7 +16,7 @@ interface Message {
 
 const Chat: React.FC = () => {
   const [input, setInput] = useState("");
-  const { messages} = useMessages(); // assuming your hook returns addMessage
+  const {messages} = useMessages(); // assuming your hook returns addMessage
   const {user} = useAuth();
 
   const sendMessage = () => {
@@ -43,32 +47,32 @@ const Chat: React.FC = () => {
 
         {/* Messages List */}
         <div className="flex-1 overflow-y-auto mb-4">
-        {messages.map((msg) => (
+        {messages.map((msg) => {
+          const fullName = msg.sender._id !== user?._id ? `${msg.sender.firstName} ${msg.sender.lastName} ` : "";
+          
+          return (
           <ChatMessage
             key={msg._id}
+            name={fullName}
             message={msg.content}
             sender={msg.sender._id === user?._id ? "user" : "other"}
             timestamp={new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", })}
           />
-        ))}
+          )
+        })}
       </div>
 
         {/* Input Area */}
         <div className="flex gap-2">
-          <input
-            type="text"
-            className="flex-1 p-2 rounded-lg bg-gray-800 text-white focus:outline-none"
-            placeholder="Type a message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
+          <Input 
+          type="text"
+          variant="Send"
+          placeholder="Type a message..."
           />
-          <button
-            onClick={sendMessage}
-            className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-          >
-            Send
-          </button>
+          <Button
+           text="Send"
+           className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+           />
         </div>
         </div>  
       </div>
