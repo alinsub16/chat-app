@@ -11,7 +11,7 @@ export interface Message {
   _id: string;
   content: string;
   sender: User; 
-  conversationId: string | null;
+  conversationId: string;
   chatId?: string | null;
   messageType: string;
   attachments: any[];
@@ -23,7 +23,8 @@ export interface Message {
 export interface SendMessageData {
   conversationId: string;
   content: string;
-  senderId: string;
+  messageType: string;
+  attachments: any[];
 }
 
 export interface UpdateMessageData {

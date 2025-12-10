@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import ChatMessage from "@features/chat/components/ChatMessage";
+import { useConversation } from "@/features/chat/hooks/useConversation";
 import { useMessages } from "@features/chat/hooks/useMessage";
+import { SendMessageData } from "@/features/chat/types/messageTypes";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { console } from "inspector";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { send } from "process";
+
+
 
 interface Message {
   _id?: string;
@@ -16,23 +18,22 @@ interface Message {
 
 const Chat: React.FC = () => {
   const [input, setInput] = useState("");
-  const {messages} = useMessages(); // assuming your hook returns addMessage
+  const {messages, sendNewMessage, activeChatId} = useMessages(); // assuming your hook returns addMessage
   const {user} = useAuth();
 
   const sendMessage = () => {
-    if (!input.trim()) return;
+  if (!input.trim()) return;
 
-    const newMessage: Message = {
-      message: input,
-      sender: "user",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+  const payload: SendMessageData  = {
+    conversationId: activeChatId,  // IMPORTANT: must come from context or props
+    content: input,
+    messageType: "text",
+    attachments: []
+  };
+  console.log(payload)
 
-    // sendNewMessage(newMessage); // add to hook state
-    setInput("");
+  sendNewMessage(payload);
+  setInput("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -68,10 +69,14 @@ const Chat: React.FC = () => {
           type="text"
           variant="Send"
           placeholder="Type a message..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyPress}
           />
           <Button
            text="Send"
            className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+           onClick={sendMessage}
            />
         </div>
         </div>  

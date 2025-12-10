@@ -8,12 +8,12 @@ import { Message, SendMessageData, UpdateMessageData, } from "@/features/chat/ty
 export interface MessageContextType {
   messages: Message[];
   loading: boolean;
-  activeChatId: string | null;
+  activeChatId: string;
   fetchMessages: (conversationId: string) => Promise<void>;
   sendNewMessage: (data: SendMessageData) => Promise<void>;
   updateMessage: (messageId: string, data: UpdateMessageData) => Promise<void>;
   clearMessages: (conversationId: string) => Promise<void>;
-  setActiveChat: (conversationId: string | null) => void;
+  setActiveChat: (conversationId: string) => void;
   refreshMessages: () => Promise<void>;
 }
 
@@ -22,7 +22,7 @@ export const MessageContext = createContext<MessageContextType | undefined>( und
 export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ children, }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+ const [activeChatId, setActiveChatId] = useState<string>("");
 
  /** FETCH messages for a conversation */
   const fetchMessages = async (conversationId: string) => {
@@ -113,11 +113,3 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 };
 
-/** Custom hook */
-export const useMessages = () => {
-  const context = useContext(MessageContext);
-  if (!context) {
-    throw new Error("useMessages must be used inside MessageProvider");
-  }
-  return context;
-};
