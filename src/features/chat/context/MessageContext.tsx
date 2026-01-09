@@ -1,16 +1,20 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, } from "react";
 import { sendMessage, getChatMessages, deleteChatMessages, updateChatMessage, } from "@/features/chat/api/messageApi";
-import { Message, SendMessageData, UpdateMessageData, } from "@/features/chat/types/messageTypes";
+import { Message, SendMessageData, UpdateMessageData,SendMessageWithTemp,UIMessage } from "@/features/chat/types/messageTypes";
+import { useSocket } from "@/features/chat/hooks/useSocket";
 
 /** ---------------------------
  *  Context Interface
  * --------------------------- */
 export interface MessageContextType {
-  messages: Message[];
+  messages: UIMessage[];
   loading: boolean;
   activeChatId: string;
   fetchMessages: (conversationId: string) => Promise<void>;
-  sendNewMessage: (data: SendMessageData) => Promise<void>;
+  sendNewMessage: (
+    payload: SendMessageData,
+    tempMsg?: UIMessage
+  ) => Promise<void>;
   updateMessage: (messageId: string, data: UpdateMessageData) => Promise<void>;
   clearMessages: (conversationId: string) => Promise<void>;
   setActiveChat: (conversationId: string) => void;
@@ -20,7 +24,7 @@ export interface MessageContextType {
 export const MessageContext = createContext<MessageContextType | undefined>( undefined );
 
 export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ children, }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<UIMessage[]>([]);
   const [loading, setLoading] = useState(false);
  const [activeChatId, setActiveChatId] = useState<string>("");
 
@@ -43,22 +47,32 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   /** Send message */
-  const sendNewMessage = useCallback(
-    async (data: SendMessageData) => {
-      try {
-        const newMsg = await sendMessage(data);
-
-        // Backend returns: conversationId
-        if (newMsg.conversationId === activeChatId) {
-          setMessages((prev) => [...prev, newMsg]);
-        }
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        throw error;
+const sendNewMessage = useCallback(
+  async (payload: SendMessageData, tempMsg?: UIMessage): Promise<void> => {
+    try {
+      if (tempMsg) {
+        setMessages((prev) => [...prev, tempMsg]);
       }
-    },
-    [activeChatId]
-  );
+
+      const newMsg: Message = await sendMessage(payload);
+
+      if (tempMsg) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempMsg._id ? newMsg : msg
+          )
+        );
+      } else {
+        setMessages((prev) => [...prev, newMsg]);
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      throw error;
+    }
+  },
+  []
+);
+
 
   /** Update message */
   const updateMessage = useCallback(

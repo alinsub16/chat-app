@@ -18,6 +18,8 @@ export interface Message {
   readBy: any[];
   createdAt: string;
   updatedAt: string;
+  status?: "sending" | "error";
+  __v:any;
 }
 
 export interface SendMessageData {
@@ -25,6 +27,7 @@ export interface SendMessageData {
   content: string;
   messageType: string;
   attachments: any[];
+  
 }
 
 export interface UpdateMessageData {
@@ -32,3 +35,15 @@ export interface UpdateMessageData {
   messageType?: string;
   attachments?: any[];
 }
+
+
+export type SendMessageWithTemp = SendMessageData & {
+  _id?: string;
+  sender?: User
+createdAt:string;
+};
+
+export type UIMessage = Message | (SendMessageWithTemp & {
+  sender: User;
+  status?: "sending" | "error";
+});

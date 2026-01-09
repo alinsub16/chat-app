@@ -18,4 +18,17 @@ export default defineConfig({
       '@types': path.resolve(__dirname, './src/types'),
     },
   },
-})
+  server: {
+    proxy: {
+      // Optional: Proxy API requests to avoid CORS issues
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        ws: true,
+      },
+    },
+  },
+});

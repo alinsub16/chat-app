@@ -3,7 +3,7 @@ import React from "react";
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   labelStyle?: "default" | "small";
-  variant?: "default" | "small" | "Send";
+  variant?: "default" | "small" | "type_input";
 
 }
 
@@ -13,7 +13,7 @@ export const Input: React.FC<InputProps> = ({labelStyle="default", label, varian
       "w-full px-3 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-gray-600",
     small:
       "w-1/2 px-3 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-gray-600",
-    Send: "w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none "
+    type_input: "w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none "
   };
   const labelStyles = {
     default:
