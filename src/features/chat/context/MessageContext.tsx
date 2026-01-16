@@ -47,8 +47,7 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   /** Send message */
-const sendNewMessage = useCallback(
-  async (payload: SendMessageData, tempMsg?: UIMessage): Promise<void> => {
+const sendNewMessage = useCallback( async (payload: SendMessageData, tempMsg?: UIMessage): Promise<void> => {
     try {
       if (tempMsg) {
         setMessages((prev) => [...prev, tempMsg]);
@@ -59,7 +58,7 @@ const sendNewMessage = useCallback(
       if (tempMsg) {
         setMessages((prev) =>
           prev.map((msg) =>
-            msg._id === tempMsg._id ? newMsg : msg
+            msg.sender._id === tempMsg._id ? newMsg : msg
           )
         );
       } else {
