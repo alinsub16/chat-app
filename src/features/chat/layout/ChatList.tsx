@@ -22,7 +22,7 @@ const ChatList = () => {
   }
 
   return (
-    <div className="w-full max-w-[330px] h-screen bg-black text-white overflow-y-auto p-2">
+    <div className="w-full max-w-[330px] bg-black text-white overflow-y-auto p-2">
     
     {conversations.map((conv) => {   
     const participants = conv.participants || [];

@@ -6,7 +6,7 @@ import Header from '@/components/layout/Header'
 
 const ChatDashboard = () => {
   return (
-    <div className='h-screen w-full bg-primary-dark'>
+    <div className='h-dvh w-full bg-primary-dark relative pb-10 overflow-hidden'>
       <div className='float-left'>
         <Sidebar/>
       </div>
@@ -14,7 +14,7 @@ const ChatDashboard = () => {
         <div>
             <Header />
         </div> 
-        <div className='flex'>
+        <div className='flex overflow-hidden'>
             <ChatList/>
             <ChatBoard />
         </div>

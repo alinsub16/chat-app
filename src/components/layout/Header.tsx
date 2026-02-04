@@ -1,5 +1,5 @@
 import React from 'react'
-import SearchComponent from '@/components/ui/SearchComponent'
+import SearchComponent from '@/features/chat/components/SearchComponent'
 
 const handleSearch = (query: string): void => {
   console.log("Search query:", query);
@@ -7,7 +7,7 @@ const handleSearch = (query: string): void => {
 
 const Header = () => {
   return (
-    <header className='p-3 flex justify-between align-center'>
+    <header className='p-3 flex justify-between align-center '>
         <div>
             <p>Online Users</p>
         </div>
