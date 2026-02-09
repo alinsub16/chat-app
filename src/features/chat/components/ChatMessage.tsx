@@ -15,6 +15,7 @@ interface ChatMessageProps {
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ name, message, sender, timestamp, linkPreview }) => {
+  
   return (
     <div className={`flex ${sender === "user" ? "justify-end" : "justify-start"} mb-4`}>
       <div className="max-w-xs " >

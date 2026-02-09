@@ -1,5 +1,5 @@
 import api from "@services/axiosInstance";
-import { SearchUser } from "@/features/search/types/search";
+import { SearchUser } from "@/features/search/types/searchType";
 
 // Search users by query
 export const searchUsers = async (query: string): Promise<SearchUser[]> => {
