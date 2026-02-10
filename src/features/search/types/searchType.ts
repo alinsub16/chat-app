@@ -1,4 +1,3 @@
-// features/search/types/search.ts
 export interface SearchUser {
   _id: string;
   firstName: string;

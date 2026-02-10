@@ -1,14 +1,7 @@
 // @refresh reset
 import React, { createContext, useEffect, useState } from "react";
-import {
-  createConversation,
-  getConversations,
-  deleteConversation,
-} from "@/features/chat/api/conversationApi";
-import {
-  Conversation,
-  CreateConversationData,
-} from "@/features/chat/types/conversationTypes";
+import { createConversation, getConversations, deleteConversation, } from "@/features/chat/api/conversationApi";
+import { Conversation, CreateConversationData, } from "@/features/chat/types/conversationTypes";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { getSocket, disconnectSocket } from "@/lib/socket";
 
@@ -41,7 +34,6 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
     console.log("User ID:", user?._id);
     console.log("Raw response from getConversations():", data);
     console.groupEnd();
-    console.log('All User' ,conversations)
 
     //  Extract the arrays from the response
     const allConversations = data.chats || [];

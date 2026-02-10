@@ -19,3 +19,17 @@ export interface ConversationsResponse {
 export interface CreateConversationData {
   receiverId: string;
 }
+
+export interface ChatListItemProps {
+  avatar: string;
+  alt?: string | null;
+  initialName?: string | null;
+  name: string;
+  message: string;
+  time: string;
+  unread?: boolean | string;
+
+  onClick?: () => void;
+  onDeleteClick?: () => void;
+  onMenuToggle?: (open: boolean) => void;
+}

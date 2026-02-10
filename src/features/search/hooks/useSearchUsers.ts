@@ -1,4 +1,3 @@
-// features/search/hooks/useSearchUsers.ts
 import { useState, useCallback, useRef } from "react";
 import { searchUsers as searchUsersApi } from "@features/search/api/searchApi";
 import { SearchUser } from "@features/search/types/searchType";

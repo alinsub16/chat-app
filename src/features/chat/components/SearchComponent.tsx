@@ -2,15 +2,25 @@ import { useState } from "react";
 import { useSearchUsers } from "@/features/search/hooks/useSearchUsers";
 import { Input } from "@/components/ui/Input";
 import { Atom } from "react-loading-indicators";
+import { useConversation } from "@/features/chat/hooks/useConversation";
 
 const UserSearch = () => {
   const [query, setQuery] = useState("");
   const { users, loading, error, searchUsers } = useSearchUsers(300);
+  const {createNewConversation} = useConversation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    searchUsers(value); // automatically debounced
+    searchUsers(value); 
+  };
+  const handleUserClick = async (userId: string) => {
+    try {
+      await createNewConversation({ receiverId: userId });
+      setQuery(""); 
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const showNoUsers = query.trim() !== "" && !loading && users.length === 0;
@@ -31,14 +41,14 @@ const UserSearch = () => {
       {error && <p className="text-red-500">{error}</p>}
 
       {(query.trim() !== "") && (
-        <div className="absolute z-10 bg-gray-700 w-full shadow-lg rounded mt-1">
+        <div className="absolute z-10 bg-gray-700 w-full max-w-lg shadow-lg rounded mt-1">
           <ul className="mt-2 max-h-60 overflow-y-auto">
             {users.length > 0 ? (
               users.map((user) => (
                 <li
                   key={user._id}
                   className="p-2 border-b hover:bg-gray-800 cursor-pointer"
-                  onClick={()=> console.log('User ID:',user._id)}
+                  onClick={() => handleUserClick(user._id)}
                 >
                   {user.firstName} {user.lastName}
                 </li>
