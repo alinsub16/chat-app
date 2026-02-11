@@ -3,14 +3,19 @@ import ChatListItem from "@/features/chat/components/ChatListItem";
 import { useConversation } from "@/features/chat/hooks/useConversation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMessages } from "@features/chat/hooks/useMessage";
+import { Atom } from "react-loading-indicators";
 
 const ChatList = () => {
-  const { conversations, loading } = useConversation();
+  const { conversations, loading, removeConversation } = useConversation();
   const { fetchMessages } = useMessages();
   const { user} = useAuth(); 
 
+ const handleDeleteConversation = (id: string) => {
+  removeConversation(id);
+};
+
   if (loading) {
-    return <div className="text-gray-400 p-4">Loading chats...</div>;
+    return <div className="text-gray-400 p-4"><Atom color="#c6ddc6" size="small" textColor="#643c3c" /></div>;
   }
 
   if (!conversations || conversations.length === 0) {
@@ -45,6 +50,8 @@ const ChatList = () => {
           message={conv.latestMessage?.content || "No messages yet"}
           time={ conv.latestMessage ? new Date(conv.latestMessage.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "" }
           onClick={()=> { fetchMessages(conv._id) }}
+          onDeleteClick={() => handleDeleteConversation(conv._id)} 
+
         />
       );
     })}

@@ -1,5 +1,5 @@
 import React from 'react'
-import UserSearch from '@/features/chat/components/SearchComponent'
+import UserSearch from '@/features/search/components/SearchComponent'
 
 
 const Header = () => {
