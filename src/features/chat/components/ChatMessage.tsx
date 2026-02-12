@@ -46,10 +46,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   return (
-    <div className={`flex ${sender === "user" ? "justify-end" : "justify-start"} mb-4 relative group`}>
+    <div className={`flex ${sender === "user" ? "justify-end" : "justify-start"} my-2 relative group `}>
       <div className="max-w-xs relative">
         {/* Name */}
-        <p className="text-gray-400 text-sm">{name}</p>
+        {/* <p className="text-gray-400 text-sm">{name}</p> */}
 
         {/* Timestamp above the message, visible on hover */}
         {timestamp && (
@@ -59,8 +59,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         )}
 
         {/* Message Bubble with relative positioning for menu */}
-        <div className={`relative p-3 rounded-lg ${sender === "user" ? "bg-purple-600 text-white" : "bg-gray-800 text-gray-200"}`}>
-          <span className="block">{message}</span>
+        <div className={`relative py-3 px-2 rounded-lg w-full ${sender === "user" ? "bg-purple-600 text-white" : "bg-gray-800 text-gray-200"}`}>
+          <span className="block text-s">{message}</span>
 
           {linkPreview && (
             <div className="mt-2 p-2 border border-gray-700 rounded-lg bg-gray-900">
@@ -72,10 +72,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
 
           {/* Three dots menu inside the bubble */}
-          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition">
+          <div className="absolute top-0 right-1 opacity-0 group-hover:opacity-100 transition">
             <button
               onClick={toggleMenu}
-              className="p-1 rounded hover:bg-gray-700 text-gray-300"
+              className="rounded text-gray-300"
             >
               <MoreHorizontal size={16} />
             </button>

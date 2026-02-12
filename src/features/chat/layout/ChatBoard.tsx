@@ -58,54 +58,56 @@ const Chat: React.FC = () => {
   // END OF INPUT HANDLER
 
   return (
-    <div className="h-dvh w-full flex flex-col bg-gray-900 relative">
+    <div className="min-h-screen w-full flex flex-col bg-gray-900 relative">
       
       {/* Header */}
-    <ProfileHeader
+      <ProfileHeader
         name={headerName}
         avatarUrl={profilePicture}
         onTabChange={() => {}}
       />
       {/* Chat Body */}
       <div className="messages-wrapper">
-      <div className="flex-1 flex flex-col overflow-hidden">
-      
-        {/* Messages (SCROLLABLE) */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((msg) => {
-            const name = msg.sender._id !== user?._id ? `${msg.sender.firstName} ${msg.sender.lastName}` : "";
-            return (
-              <ChatMessage
-                key={msg._id}
-                name={name}
-                message={msg.content}
-                sender={msg.sender._id === user?._id ? "user" : "other"}
-                timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit"
-                })}
-              />
-            );
-          })}
-        </div>
+        <div className="flex-1 flex flex-col h-full max-h-full">
+          {/* Messages (SCROLLABLE) */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {messages.map((msg) => {
+              const name =
+                msg.sender._id !== user?._id
+                  ? `${msg.sender.firstName} ${msg.sender.lastName}`
+                  : "";
+              return (
+                <ChatMessage
+                  key={msg._id}
+                  name={name}
+                  message={msg.content}
+                  sender={msg.sender._id === user?._id ? "user" : "other"}
+                  timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                />
+              );
+            })}
+          </div>
 
-        {/* Input */}
-        <div className="border-t border-gray-700 p-4 flex gap-2 bg-gray-900 absolute bottom-15 w-full max-w-[1100px]">
-          <Input
-            type="text"
-            variant="type_input"
-            placeholder="Type a message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
-          />
-          <Button
-            text="Send"
-            className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-            onClick={sendMessage}
-          />
-        </div>
-    </div>
+          {/* Input (stays at bottom) */}
+          <div className="border-t border-gray-700 p-4 flex gap-2 bg-gray-900 w-full max-w-[1100px]">
+            <Input
+              type="text"
+              variant="type_input"
+              placeholder="Type a message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+            />
+            <Button
+              text="Send"
+              className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+              onClick={sendMessage}
+            />
+          </div>
+</div>
       </div>
     </div>
   );
