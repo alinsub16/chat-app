@@ -12,9 +12,9 @@
   --color-primary: #041643;
   --color-primary-light: #0A2471;
   --color-primary-dark: #020B29;
-  --color-light: #3f3f3f
+  --color-light: #3f3f3f; /* ← FIXED */
 
-  /* 🌈 You can still use default Tailwind colors */
+  /* 🌈 Default Tailwind overrides */
   --color-red-500: #ef4444;
   --color-green-500: #22c55e;
   --color-gray-100: #f3f4f6;
@@ -29,42 +29,45 @@
 
   /* 🖋️ FONT */
   --font-sans: "Inter", sans-serif;
-
-
 }
-
-/* ===========================
-   🌐 Global Custom Styles
-   =========================== */
-[style*="--icon-url"]::before {
-  background-image: var(--icon-url);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
 
 /* =====================
    🧩 BASE STYLES
    ===================== */
 :root {
-  font-family: var(--font-sans); /* ✅ Must use var() */
-  color-scheme: light dark; /* ✅ not 'primary' */
+  font-family: var(--font-sans);
+  color-scheme: light dark;
 }
 
-
-
-.wrapper{
-  @apply w-full max-w-[1400px] block mx-auto
-}
-.messages-wrapper{
-  @apply w-full max-w-[1100px] block mx-auto
+/* Layout helpers */
+.wrapper {
+  @apply w-full max-w-[1400px] block mx-auto;
 }
 
-.before{
+.messages-wrapper {
+  @apply w-full max-w-[1100px] block mx-auto;
+}
 
-  @apply relative before:content-[''] before:absolute 
-  before:left-[-460px] before:top-1/2 before:-translate-y-1/2 
-  before:w-full before:h-full before:pointer-events-none;
+/* =====================
+   🎯 SCROLLBAR UTILITY
+   ===================== */
+@layer utilities {
+  .chat-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+    
+  }
 
+  .chat-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-scroll::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.8);
+    border-radius: 9999px;
+  }
+
+  .chat-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7);
+  }
 }

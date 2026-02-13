@@ -17,15 +17,7 @@ interface ChatMessageProps {
   onDeleteClick?: () => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({
-  name,
-  message,
-  sender,
-  timestamp,
-  linkPreview,
-  onEditClick,
-  onDeleteClick,
-}) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ name, message, sender, timestamp, linkPreview, onEditClick, onDeleteClick, }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = (e: React.MouseEvent) => {
@@ -46,37 +38,55 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   return (
-    <div className={`flex ${sender === "user" ? "justify-end" : "justify-start"} my-2 relative group `}>
-      <div className="max-w-xs relative">
-        {/* Name */}
-        {/* <p className="text-gray-400 text-sm">{name}</p> */}
-
-        {/* Timestamp above the message, visible on hover */}
+    <div
+      className={`flex ${
+        sender === "user" ? "justify-end" : "justify-start"
+      } my-2 relative`}
+    >
+      {/* group moved here + w-fit to limit hover area to bubble only */}
+      <div className="max-w-xs relative group w-fit">
+        {/* Timestamp visible only when hovering the bubble */}
         {timestamp && (
-          <span className={`absolute text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition ${sender === "user" ? "top-4 -left-16" : "top-4 -right-16"} `}>
+          <span
+            className={`absolute text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition ${
+              sender === "user" ? "top-4 -left-16" : "top-4 -right-16"
+            }`}
+          >
             {timestamp}
           </span>
         )}
 
-        {/* Message Bubble with relative positioning for menu */}
-        <div className={`relative py-3 px-2 rounded-lg w-full ${sender === "user" ? "bg-purple-600 text-white" : "bg-gray-800 text-gray-200"}`}>
+        {/* Message Bubble */}
+        <div
+          className={`relative py-3 px-2 rounded-lg w-full ${
+            sender === "user"
+              ? "bg-purple-600 text-white"
+              : "bg-gray-800 text-gray-200"
+          }`}
+        >
           <span className="block text-s">{message}</span>
 
           {linkPreview && (
             <div className="mt-2 p-2 border border-gray-700 rounded-lg bg-gray-900">
-              <a href={linkPreview.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">
+              <a
+                href={linkPreview.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 underline"
+              >
                 {linkPreview.title}
               </a>
-              {linkPreview.description && <p className="text-gray-400 text-sm">{linkPreview.description}</p>}
+              {linkPreview.description && (
+                <p className="text-gray-400 text-sm">
+                  {linkPreview.description}
+                </p>
+              )}
             </div>
           )}
 
-          {/* Three dots menu inside the bubble */}
+          {/* Three dots menu */}
           <div className="absolute top-0 right-1 opacity-0 group-hover:opacity-100 transition">
-            <button
-              onClick={toggleMenu}
-              className="rounded text-gray-300"
-            >
+            <button onClick={toggleMenu} className="rounded text-gray-300">
               <MoreHorizontal size={16} />
             </button>
 

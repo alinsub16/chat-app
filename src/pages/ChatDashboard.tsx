@@ -6,21 +6,23 @@ import Header from '@/components/layout/Header'
 
 const ChatDashboard = () => {
   return (
-    <div className='h-dvh w-full bg-primary-dark relative pb-10 overflow-hidden'>
-      <div className='float-left'>
-        <Sidebar/>
-      </div>
-      <div className='flex flex-col'>
-        <div>
-            <Header />
-        </div> 
-        <div className='flex overflow-hidden'>
-            <ChatList/>
-            <ChatBoard />
+    <div className="h-dvh w-full flex bg-primary-dark overflow-hidden">
+      
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+
+        {/* Chat Area */}
+        <div className="flex flex-1 overflow-hidden">
+          <ChatList />
+          <ChatBoard />
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ChatDashboard
