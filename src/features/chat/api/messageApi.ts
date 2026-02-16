@@ -15,7 +15,7 @@ export const getChatMessages = async (conversationId: string): Promise<Message[]
 };
 
 // Delete all messages in a chat
-export const deleteChatMessages = async (
+export const deleteChatMessage = async (
   chatId: string
 ): Promise<{ success: boolean }> => {
   const res = await api.delete<{ success: boolean }>(`/messages/${chatId}`);

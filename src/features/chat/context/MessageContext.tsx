@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, } from "react";
-import { sendMessage, getChatMessages, deleteChatMessages, updateChatMessage, } from "@/features/chat/api/messageApi";
+import { sendMessage, getChatMessages, deleteChatMessage, updateChatMessage, } from "@/features/chat/api/messageApi";
 import { Message, SendMessageData, UpdateMessageData,SendMessageWithTemp,UIMessage } from "@/features/chat/types/messageTypes";
 import { useSocket } from "@/features/chat/hooks/useSocket";
 
@@ -16,7 +16,7 @@ export interface MessageContextType {
     tempMsg?: UIMessage
   ) => Promise<void>;
   updateMessage: (messageId: string, data: UpdateMessageData) => Promise<void>;
-  clearMessages: (conversationId: string) => Promise<void>;
+  deleteMessage: ( messageId: string) => Promise<void>;
   setActiveChat: (conversationId: string) => void;
   refreshMessages: () => Promise<void>;
 }
@@ -27,6 +27,7 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [loading, setLoading] = useState(false);
  const [activeChatId, setActiveChatId] = useState<string>("");
+ const { socket, isConnected, sendSocketMessage } = useSocket();
 
  /** FETCH messages for a conversation */
   const fetchMessages = async (conversationId: string) => {
@@ -89,17 +90,27 @@ const sendNewMessage = useCallback( async (payload: SendMessageData, tempMsg?: U
     []
   );
 
-  /** Clear all messages */
-  const clearMessages = useCallback(
-    async (conversationId: string) => {
+  const deleteMessage = useCallback(
+    async (messageId: string | undefined, isTemp = false) => {
+      if (!messageId) return;
       try {
-        await deleteChatMessages(conversationId);
-        if (activeChatId === conversationId) setMessages([]);
+        // Optimistic UI
+        setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+        
+        if (isTemp) return;
+
+        // Emit deletion via socket
+        if (socket && isConnected) {
+          socket.emit("deleteMessage", { messageId });
+        }
+        // Persist deletion
+        await deleteChatMessage(messageId);
       } catch (error) {
-        console.error("Failed to delete chat messages:", error);
+        console.error("Failed to delete message:", error);
+        throw error;
       }
     },
-    [activeChatId]
+    [socket, isConnected]
   );
 
   /** Refresh current chat */
@@ -116,7 +127,7 @@ const sendNewMessage = useCallback( async (payload: SendMessageData, tempMsg?: U
         fetchMessages,
         sendNewMessage,
         updateMessage,
-        clearMessages,
+        deleteMessage,
         setActiveChat: setActiveChatId,
         refreshMessages,
       }}

@@ -10,7 +10,7 @@ import ProfileHeader from "@/features/chat/layout/ProfileHeader";
 
 const Chat: React.FC = () => {
   const [input, setInput] = useState("");
-  const { messages, sendNewMessage, activeChatId } = useMessages();
+  const { messages, sendNewMessage, activeChatId, deleteMessage } = useMessages();
   const { conversations }  = useConversation();
   const { user } = useAuth();
 
@@ -98,7 +98,7 @@ const Chat: React.FC = () => {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-                onDeleteClick={()=> {console.log("Delete", msg._id)}}
+                onDeleteClick={()=> deleteMessage(msg._id!)}
                 onEditClick={()=> {}}
               />
             );
