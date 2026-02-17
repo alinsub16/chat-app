@@ -30,22 +30,68 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
  const { socket, isConnected, sendSocketMessage } = useSocket();
 
  /** FETCH messages for a conversation */
-  const fetchMessages = async (conversationId: string) => {
+const fetchMessages = useCallback(
+  async (conversationId: string) => {
     if (!conversationId) return;
     setLoading(true);
+
     try {
+      // Fetch messages from backend
       const data = await getChatMessages(conversationId);
-      // Important: backend returns object, convert to array
       const safeData = Array.isArray(data) ? data : [data];
+
+      // Update UI
       setMessages(safeData);
       setActiveChatId(conversationId);
 
+      // Emit join chat to socket (similar to emitting deleteMessage)
+      if (socket && isConnected) {
+        socket.emit("joinChat", conversationId);
+      }
+
+      // Remove previous listeners to prevent duplicates
+      socket?.off("receiveMessage");
+      socket?.off("messageUpdated");
+      socket?.off("messageDeleted");
+
+      // Setup listeners
+      const handleReceiveMessage = (message: UIMessage) => {
+        if (message.conversationId === conversationId) {
+          setMessages((prev) => [...prev, message]);
+        }
+      };
+
+      const handleUpdateMessage = (updated: UIMessage) => {
+        if (updated.conversationId === conversationId) {
+          setMessages((prev) =>
+            prev.map((msg) => (msg._id === updated._id ? updated : msg))
+          );
+        }
+      };
+
+      const handleDeleteMessage = (deleted: { messageId: string; conversationId: string }) => {
+        if (deleted.conversationId === conversationId) {
+          setMessages((prev) =>
+            prev.filter((msg) => msg._id !== deleted.messageId)
+          );
+        }
+      };
+
+      socket?.on("receiveMessage", handleReceiveMessage);
+      socket?.on("messageUpdated", handleUpdateMessage);
+      socket?.on("messageDeleted", handleDeleteMessage);
+
+      // ⚠️ No cleanup returned — cleanup handled in useEffect or other logic
+
     } catch (error) {
-      console.error("❌ Failed to fetch messages:", error);
+      console.error("Failed to fetch messages:", error);
     } finally {
       setLoading(false);
     }
-  };
+  },
+  [socket, isConnected]
+);
+
 
   /** Send message */
 const sendNewMessage = useCallback( async (payload: SendMessageData, tempMsg?: UIMessage): Promise<void> => {
@@ -76,19 +122,42 @@ const sendNewMessage = useCallback( async (payload: SendMessageData, tempMsg?: U
 
   /** Update message */
   const updateMessage = useCallback(
-    async (messageId: string, data: UpdateMessageData) => {
-      try {
-        const updated = await updateChatMessage(messageId, data);
-        setMessages((prev) =>
-          prev.map((msg) => (msg._id === updated._id ? updated : msg))
-        );
-      } catch (error) {
-        console.error("Failed to update message:", error);
-        throw error;
+  async (messageId: string, data: UpdateMessageData) => {
+    if (!messageId) return;
+
+    try {
+      //  Optimistic UI update
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId
+            ? { ...msg, ...data, updatedAt: new Date().toISOString() }
+            : msg
+        )
+      );
+
+      // Emit update via socket (realtime sync)
+      if (socket && isConnected) {
+        socket.emit("updateMessage", {
+          messageId,
+          ...data,
+        });
       }
+
+      // Persist change to backend
+      const updated = await updateChatMessage(messageId, data);
+
+      // Replace with server truth (ensures consistency)
+      setMessages((prev) =>
+        prev.map((msg) => (msg._id === updated._id ? updated : msg))
+      );
+    } catch (error) {
+      console.error("Failed to update message:", error);
+      throw error;
+    }
     },
-    []
+    [socket, isConnected]
   );
+
 
   const deleteMessage = useCallback(
     async (messageId: string | undefined, isTemp = false) => {

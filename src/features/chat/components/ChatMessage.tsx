@@ -39,10 +39,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ name, message, sender, timest
 
   return (
     <div
-      className={`flex ${
-        sender === "user" ? "justify-end" : "justify-start"
-      } my-2 relative`}
-    >
+      className={`flex ${ sender === "user" ? "justify-end" : "justify-start" } my-2 relative`} >
       {/* group moved here + w-fit to limit hover area to bubble only */}
       <div className="max-w-xs relative group w-fit">
         {/* Timestamp visible only when hovering the bubble */}
@@ -94,13 +91,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ name, message, sender, timest
               <div className="absolute right-0 top-6 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-20">
                 <button
                   onClick={handleEdit}
-                  className="block w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-gray-800"
+                  className={`block w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-gray-800 ${sender === "user" ? "" : "hidden"}`}
                 >
                   Edit
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800"
+                  className={`block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 ${sender === "user" ? "" : "hidden"}`}
                 >
                   Delete
                 </button>

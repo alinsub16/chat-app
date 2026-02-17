@@ -19,7 +19,7 @@ const Register = () => {
         await register(data);
         setModal({
           show: true,
-          title: "Registration Successful ✅",
+          title: "Registration Successful ",
           message: "You can now log in.",
         });
         setTimeout(() => {
