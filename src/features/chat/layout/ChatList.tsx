@@ -47,8 +47,8 @@ const ChatList = () => {
           initialName={firstCharName}
           alt={fullName}
           name={conv.chatName || fullName || "null"}
-          message={conv.latestMessage?.content || "No messages yet"}
-          time={ conv.latestMessage ? new Date(conv.latestMessage.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "" }
+          message={conv.latestMessage?.content ?? "No messages yet"}
+          time={conv.latestMessage ? new Date(conv.latestMessage.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "" }
           onClick={()=> { fetchMessages(conv._id) }}
           onDeleteClick={() => handleDeleteConversation(conv._id)} 
 

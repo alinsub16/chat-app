@@ -4,7 +4,7 @@ import {Message} from "@features/chat/types/messageTypes"
 export interface Conversation {
   _id: string;
   participants: User[];
-  latestMessage: Message;
+  latestMessage: Message | string;
   chatName: string | null;
   createdAt: string;
   updatedAt: string;
@@ -25,7 +25,7 @@ export interface ChatListItemProps {
   alt?: string | null;
   initialName?: string | null;
   name: string;
-  message: string;
+  message: any;
   time: string;
   unread?: boolean | string;
 

@@ -17,7 +17,9 @@ interface SocketContextType {
     onTyping: (data: any) => void,
     onError: (error: any) => void,
     onMessageUpdate: (data: any) => void,
-    onMessageDelete: (data: any) => void
+    onMessageDelete: (data: any) => void,
+    onConversationCreated?: (data: any) => void,   // added
+    onConversationDeleted?: (data: any) => void   // added
   ) => () => void;
 }
 
@@ -37,10 +39,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const { user, token } = useAuth();
 
-  // Use VITE_SOCKET_URL for Vite apps
   const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
-  // Initialize socket connection
   useEffect(() => {
     if (!user || !token) {
       if (socket) {
@@ -50,14 +50,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return;
     }
 
-    // Only create socket if it doesn't exist
     if (!socket) {
       console.log('🔌 Connecting to socket server:', SOCKET_URL);
-      
+
       const newSocket = io(SOCKET_URL, {
-        auth: {
-          token: token,
-        },
+        auth: { token },
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: 5,
@@ -67,46 +64,30 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       setSocket(newSocket);
 
-      // Event listeners
       newSocket.on('connect', () => {
-        console.log('✅ Socket connected to port 5000:', newSocket.id);
+        console.log('✅ Socket connected:', newSocket.id);
         setIsConnected(true);
-        
-        // Request online users list
         newSocket.emit('getOnlineUsers');
       });
 
-      newSocket.on('disconnect', () => {
-        console.log('❌ Socket disconnected from port 5000');
-        setIsConnected(false);
-      });
-
+      newSocket.on('disconnect', () => setIsConnected(false));
       newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error (port 5000):', error.message);
+        console.error('Socket connection error:', error.message);
         setIsConnected(false);
       });
 
-      newSocket.on('onlineUsers', (users: string[]) => {
-        console.log('Online users:', users);
-        setOnlineUsers(users);
-      });
+      newSocket.on('onlineUsers', (users: string[]) => setOnlineUsers(users));
 
       newSocket.on('userOnline', ({ userId }: { userId: string }) => {
-        console.log('User came online:', userId);
-        setOnlineUsers(prev => 
-          prev.includes(userId) ? prev : [...prev, userId]
-        );
+        setOnlineUsers(prev => (prev.includes(userId) ? prev : [...prev, userId]));
       });
 
       newSocket.on('userOffline', ({ userId }: { userId: string }) => {
-        console.log('User went offline:', userId);
         setOnlineUsers(prev => prev.filter(id => id !== userId));
       });
     }
 
-    // Cleanup
     return () => {
-      // Don't disconnect here, just remove listeners
       if (socket) {
         socket.off('connect');
         socket.off('disconnect');
@@ -118,22 +99,22 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [user, token, SOCKET_URL]);
 
-  // Setup message handlers dynamically
+  // Setup message handlers with conversation events
   const setupMessageHandlers = useCallback((
     onMessageReceive: (message: any) => void,
     onMessageSent: (message: any) => void,
     onTyping: (data: any) => void,
     onError: (error: any) => void,
     onMessageUpdate: (data: any) => void,
-    onMessageDelete: (data: any) => void
+    onMessageDelete: (data: any) => void,
+    onConversationCreated?: (data: any) => void,
+    onConversationDeleted?: (data: any) => void
   ) => {
     if (!socket) {
       console.log('Socket not available for setting up handlers');
       return () => {};
     }
 
-    console.log('Setting up socket message handlers');
-    
     socket.on('receiveMessage', onMessageReceive);
     socket.on('messageSent', onMessageSent);
     socket.on('userTyping', onTyping);
@@ -141,48 +122,36 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     socket.on('messageUpdated', onMessageUpdate);
     socket.on('messageDeleted', onMessageDelete);
 
-    // Cleanup function
+    if (onConversationCreated) socket.on('conversation:created', onConversationCreated);
+    if (onConversationDeleted) socket.on('conversation:deleted', onConversationDeleted);
+
     return () => {
-      console.log('Cleaning up socket message handlers');
       socket.off('receiveMessage', onMessageReceive);
       socket.off('messageSent', onMessageSent);
       socket.off('userTyping', onTyping);
       socket.off('errorMessage', onError);
       socket.off('messageUpdated', onMessageUpdate);
       socket.off('messageDeleted', onMessageDelete);
+
+      if (onConversationCreated) socket.off('conversation:created', onConversationCreated);
+      if (onConversationDeleted) socket.off('conversation:deleted', onConversationDeleted);
     };
   }, [socket]);
 
-  // Socket actions
   const joinChat = useCallback((chatId: string) => {
-    if (socket && isConnected) {
-      console.log('Joining chat room:', chatId);
-      socket.emit('joinChat', chatId);
-    } else {
-      console.log('Cannot join chat - socket not connected');
-    }
+    if (socket && isConnected) socket.emit('joinChat', chatId);
   }, [socket, isConnected]);
 
   const leaveChat = useCallback((chatId: string) => {
-    if (socket && isConnected) {
-      console.log('Leaving chat room:', chatId);
-      socket.emit('leaveChat', chatId);
-    }
+    if (socket && isConnected) socket.emit('leaveChat', chatId);
   }, [socket, isConnected]);
 
   const sendSocketMessage = useCallback((data: any) => {
-    if (socket && isConnected) {
-      console.log('Sending message via socket:', data);
-      socket.emit('sendMessage', data);
-    } else {
-      console.log('Cannot send message - socket not connected');
-    }
+    if (socket && isConnected) socket.emit('sendMessage', data);
   }, [socket, isConnected]);
 
   const emitTyping = useCallback((conversationId: string, isTyping: boolean) => {
-    if (socket && isConnected) {
-      socket.emit('typing', { conversationId, isTyping });
-    }
+    if (socket && isConnected) socket.emit('typing', { conversationId, isTyping });
   }, [socket, isConnected]);
 
   const value = {
@@ -196,9 +165,5 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setupMessageHandlers,
   };
 
-  return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
-  );
+  return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
 };

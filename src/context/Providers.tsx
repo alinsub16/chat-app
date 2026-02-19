@@ -11,13 +11,13 @@ interface ProvidersProps {
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
     <AuthProvider>
-      <ConversationProvider>
-        <SocketProvider>
-          <MessageProvider>
-            {children}
-          </MessageProvider>
-        </SocketProvider>
-      </ConversationProvider>
+      <SocketProvider>
+        <ConversationProvider>
+            <MessageProvider>
+              {children}
+            </MessageProvider>
+        </ConversationProvider>
+      </SocketProvider>
     </AuthProvider>
   );
 };
