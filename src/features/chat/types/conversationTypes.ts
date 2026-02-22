@@ -4,13 +4,13 @@ import {Message} from "@features/chat/types/messageTypes"
 export interface Conversation {
   _id: string;
   participants: User[];
-  latestMessage: Message | string;
+  latestMessage: Message | null;
   chatName: string | null;
   createdAt: string;
   updatedAt: string;
   unreadCount:number;
   conversations:string[] | null;
-  groupChats:string[] | null;
+  groupChats?:string[] | null;
 }
 export interface ConversationsResponse {
   chats: Conversation[];

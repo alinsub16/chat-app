@@ -147,11 +147,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [socket, isConnected]);
 
   const sendSocketMessage = useCallback((data: any) => {
-    if (socket && isConnected) socket.emit('sendMessage', data);
+    if (socket && isConnected) 
+    socket.emit('sendMessage', data);
   }, [socket, isConnected]);
 
   const emitTyping = useCallback((conversationId: string, isTyping: boolean) => {
-    if (socket && isConnected) socket.emit('typing', { conversationId, isTyping });
+    if (socket && isConnected) 
+    socket.emit("typing", {
+    conversationId,
+    userId: user?._id,
+    isTyping,
+  });
   }, [socket, isConnected]);
 
   const value = {

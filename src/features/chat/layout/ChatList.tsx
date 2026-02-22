@@ -39,7 +39,6 @@ const ChatList = () => {
     const firstCharName = otherUser ? `${otherUser.firstName?.charAt(0) || ""}${otherUser.lastName?.charAt(0) || ""}`.toUpperCase() : "?";
     // Profile Picture
     const profilePicture = otherUser?.profilePicture || null;
-    
       return (
         <ChatListItem
           key={conv._id}

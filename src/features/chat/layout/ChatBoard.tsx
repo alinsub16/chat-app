@@ -4,6 +4,7 @@ import { useMessages } from "@features/chat/hooks/useMessage";
 import { SendMessageData, UIMessage } from "@/features/chat/types/messageTypes";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConversation } from "@/features/chat/hooks/useConversation";
+import { useSocket } from "@/features/chat/hooks/useSocket";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import ProfileHeader from "@/features/chat/layout/ProfileHeader";
@@ -12,22 +13,25 @@ const Chat: React.FC = () => {
   const [input, setInput] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
 
-  const { messages, sendNewMessage, activeChatId, deleteMessage, updateMessage } =
+  const { messages, typingUsers, sendNewMessage, activeChatId, deleteMessage, updateMessage } =
     useMessages();
   const { conversations } = useConversation();
   const { user } = useAuth();
+  const { emitTyping } = useSocket();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // AUTO SCROLL TO BOTTOM WHEN MESSAGES CHANGE
+  // -------------------------
+  // Scroll to bottom on new messages
+  // -------------------------
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, activeChatId]);
 
-  // ACTIVE CONVERSATION
-  const activeConversation = conversations.find(
-    (convo) => convo._id === activeChatId
-  );
+  // -------------------------
+  // Active conversation info
+  // -------------------------
+  const activeConversation = conversations.find((convo) => convo._id === activeChatId);
 
   const otherParticipant = activeConversation?.participants?.find(
     (p) => String(p._id) !== String(user?._id)
@@ -38,38 +42,34 @@ const Chat: React.FC = () => {
     : "Unknown User";
 
   const profilePicture = otherParticipant?.profilePicture ?? "/avatar.jpg";
-  // END OF ACTIVE CONVERSATION
 
-  // START EDIT
+  // -------------------------
+  // Message edit
+  // -------------------------
   const startEditing = (msg: UIMessage) => {
     if (!msg._id) return;
     setEditingMessageId(msg._id);
-    setInput(msg.content); // reuse main input
+    setInput(msg.content);
   };
 
-  // CANCEL EDIT
   const cancelEditing = () => {
     setEditingMessageId(null);
     setInput("");
   };
 
-  // SEND OR SAVE MESSAGE
+  // -------------------------
+  // Send or save message
+  // -------------------------
   const handleSubmit = async () => {
-    if (!input.trim() || !user) return;
+    if (!input.trim() || !user || !activeChatId) return;
 
-    // EDIT MODE
     if (editingMessageId) {
-      try {
-        await updateMessage(editingMessageId, { content: input });
-        setEditingMessageId(null);
-        setInput("");
-      } catch (err) {
-        console.error("Edit failed:", err);
-      }
+      await updateMessage(editingMessageId, { content: input });
+      setEditingMessageId(null);
+      setInput("");
       return;
     }
 
-    // SEND MODE
     const payload: SendMessageData = {
       conversationId: activeChatId,
       content: input,
@@ -95,26 +95,45 @@ const Chat: React.FC = () => {
     setInput("");
   };
 
-  // INPUT HANDLER
+  // -------------------------
+  // Input handlers
+  // -------------------------
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") handleSubmit();
     if (e.key === "Escape" && editingMessageId) cancelEditing();
   };
 
+  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInput(value);
+
+    if (!activeChatId || !user) return;
+
+    emitTyping(activeChatId, value.length > 0);
+
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => {
+      emitTyping(activeChatId, false);
+    }, 1500);
+  };
+
+  // -------------------------
+  // Filter messages for active conversation
+  // -------------------------
+  const messagesForActiveChat = messages.filter((msg) => msg.conversationId === activeChatId);
+
   return (
     <div className="flex flex-col flex-1 bg-gray-900 overflow-hidden">
       {/* Header */}
-      <ProfileHeader
-        name={headerName}
-        avatarUrl={profilePicture}
-        onTabChange={() => {}}
-      />
+      <ProfileHeader name={headerName} avatarUrl={profilePicture} onTabChange={() => {}} />
 
       {/* Body */}
       <div className="flex flex-col flex-1 overflow-hidden px-40">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">
-          {messages.map((msg) => {
+          {messagesForActiveChat.map((msg) => {
             const isOwnMessage = msg.sender._id === user?._id;
             const name = !isOwnMessage ? `${msg.sender.firstName} ${msg.sender.lastName}` : "";
 
@@ -133,12 +152,22 @@ const Chat: React.FC = () => {
               />
             );
           })}
-
-          {/* Dummy div for auto-scroll */}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input / Send / Edit */}
+        {/* Typing indicator */}
+        <div className="text-xs text-gray-400 h-5 px-2">
+          {Object.entries(typingUsers)
+            .filter(([userId, isTyping]) => isTyping && userId !== user?._id)
+            .map(([userId]) => {
+              const typingUser = activeConversation?.participants.find(
+                (p) => String(p._id) === String(userId)
+              );
+              return typingUser ? `${typingUser.firstName} is typing...` : null;
+            })}
+        </div>
+
+        {/* Input */}
         <div className="border-t border-gray-700 p-4 flex gap-2 bg-gray-900 items-center">
           {editingMessageId && (
             <span className="text-xs text-gray-400 mr-2">Editing message</span>
@@ -149,7 +178,7 @@ const Chat: React.FC = () => {
             variant="type_input"
             placeholder={editingMessageId ? "Edit your message..." : "Type a message..."}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyPress}
           />
 
