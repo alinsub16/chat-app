@@ -9,7 +9,11 @@ interface SocketContextType {
   onlineUsers: string[];
   joinChat: (chatId: string) => void;
   leaveChat: (chatId: string) => void;
+  deleteMessageSocket: (data: any) => void;
+  updateMessageSocket: (data: any) => void;
   sendSocketMessage: (data: any) => void;
+  reactMessageSocket: (data: { messageId: string; emoji: string }) => void;
+  onReactionUpdate?: (data: any) => void,
   emitTyping: (conversationId: string, isTyping: boolean) => void;
   setupMessageHandlers: (
     onMessageReceive: (message: any) => void,
@@ -18,8 +22,8 @@ interface SocketContextType {
     onError: (error: any) => void,
     onMessageUpdate: (data: any) => void,
     onMessageDelete: (data: any) => void,
-    onConversationCreated?: (data: any) => void,   // added
-    onConversationDeleted?: (data: any) => void   // added
+    onConversationCreated?: (data: any) => void,   
+    onConversationDeleted?: (data: any) => void   
   ) => () => void;
 }
 
@@ -107,32 +111,38 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     onError: (error: any) => void,
     onMessageUpdate: (data: any) => void,
     onMessageDelete: (data: any) => void,
+    onReactionUpdate?: (data: any) => void,
     onConversationCreated?: (data: any) => void,
     onConversationDeleted?: (data: any) => void
   ) => {
-    if (!socket) {
+    if (!socket?.connected) {
       console.log('Socket not available for setting up handlers');
       return () => {};
     }
 
     socket.on('receiveMessage', onMessageReceive);
     socket.on('messageSent', onMessageSent);
-    socket.on('userTyping', onTyping);
+
+    // ✅ FIXED: backend emits "typing", not "userTyping"
+    socket.on('typing', onTyping);
+
     socket.on('errorMessage', onError);
     socket.on('messageUpdated', onMessageUpdate);
     socket.on('messageDeleted', onMessageDelete);
 
+    if (onReactionUpdate) socket.on("messageReactionUpdated", onReactionUpdate);
     if (onConversationCreated) socket.on('conversation:created', onConversationCreated);
     if (onConversationDeleted) socket.on('conversation:deleted', onConversationDeleted);
 
     return () => {
       socket.off('receiveMessage', onMessageReceive);
       socket.off('messageSent', onMessageSent);
-      socket.off('userTyping', onTyping);
+      socket.off('typing', onTyping); 
       socket.off('errorMessage', onError);
       socket.off('messageUpdated', onMessageUpdate);
       socket.off('messageDeleted', onMessageDelete);
 
+      if (onReactionUpdate) socket.off("messageReactionUpdated", onReactionUpdate);
       if (onConversationCreated) socket.off('conversation:created', onConversationCreated);
       if (onConversationDeleted) socket.off('conversation:deleted', onConversationDeleted);
     };
@@ -147,18 +157,44 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [socket, isConnected]);
 
   const sendSocketMessage = useCallback((data: any) => {
-    if (socket && isConnected) 
-    socket.emit('sendMessage', data);
-  }, [socket, isConnected]);
+    if (socket?.connected) {
+      socket.emit("sendMessage", data);
+      console.log("🔹 Emitting sendMessage:", data);
+    }
+  }, [socket]);
+
+  const updateMessageSocket = useCallback((data: any) => {
+    if (socket?.connected) {
+      socket.emit("updateMessage", data);
+      console.log("✏️ updateMessage:", data);
+    }
+  }, [socket]);
+
+  const deleteMessageSocket = useCallback((data: any) => {
+    if (socket?.connected) {
+      socket.emit("deleteMessage", data);
+      console.log("🗑 deleteMessage:", data);
+    }
+  }, [socket]);
+
+  const reactMessageSocket = useCallback(
+  (data: { messageId: string; emoji: string }) => {
+    if (socket?.connected) {
+      socket.emit("reactMessage", data);
+      console.log("😀 reactMessage:", data);
+    }
+  },
+  [socket]
+);
 
   const emitTyping = useCallback((conversationId: string, isTyping: boolean) => {
     if (socket && isConnected) 
-    socket.emit("typing", {
-    conversationId,
-    userId: user?._id,
-    isTyping,
-  });
-  }, [socket, isConnected]);
+      socket.emit("typing", {
+        roomId: conversationId,
+        userId: user?._id,
+        isTyping,
+      });
+  }, [socket, isConnected, user]);
 
   const value = {
     socket,
@@ -167,6 +203,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     joinChat,
     leaveChat,
     sendSocketMessage,
+    updateMessageSocket,   
+    deleteMessageSocket, 
+    reactMessageSocket,  
     emitTyping,
     setupMessageHandlers,
   };

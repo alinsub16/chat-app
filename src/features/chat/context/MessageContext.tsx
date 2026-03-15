@@ -1,13 +1,18 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import {
-  sendMessage,
-  getChatMessages,
-  deleteChatMessage,
-  updateChatMessage,
-} from "@/features/chat/api/messageApi";
-import { Message, UIMessage, SendMessageData, UpdateMessageData } from "@/features/chat/types/messageTypes";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
+import { getChatMessages,uploadMessageAttachments } from "@/features/chat/api/messageApi";
+import { UIMessage,SendMessagePayload, Attachment  } from "@/features/chat/types/messageTypes";
 import { useSocket } from "@/features/chat/hooks/useSocket";
 import { ConversationContext } from "@/features/chat/context/ConversationContext";
+
+
+
 
 export interface MessageContextType {
   messages: UIMessage[];
@@ -15,164 +20,258 @@ export interface MessageContextType {
   activeChatId: string;
   typingUsers: Record<string, boolean>;
   fetchMessages: (conversationId: string) => Promise<void>;
-  sendNewMessage: (payload: SendMessageData, tempMsg?: UIMessage) => Promise<void>;
-  updateMessage: (messageId: string, data: UpdateMessageData) => Promise<void>;
-  deleteMessage: (messageId: string) => Promise<void>;
+  sendNewMessage: (payload: SendMessagePayload) => void;
+  updateMessage: (messageId: string, content: string) => void;
+  deleteMessage: (messageId: string) => void;
+  reactToMessage: (messageId: string,emoji: string) => void;
   setActiveChat: (conversationId: string) => void;
   refreshMessages: () => Promise<void>;
+  emitTypingEvent: (isTyping: boolean) => void;
 }
 
-export const MessageContext = createContext<MessageContextType | undefined>(undefined);
+export const MessageContext = createContext<MessageContextType | undefined>(
+  undefined
+);
 
-export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string>("");
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
-  const { socket, isConnected } = useSocket();
+
+  const {
+    joinChat,
+    leaveChat,
+    setupMessageHandlers,
+    sendSocketMessage,
+    emitTyping,
+    deleteMessageSocket,
+    updateMessageSocket,
+    reactMessageSocket,
+  } = useSocket();
+
   const conversationContext = useContext(ConversationContext);
 
-  // -------------------------
-  // Fetch messages for a conversation
-  // -------------------------
-  const fetchMessages = useCallback(
-    async (conversationId: string) => {
-      if (!conversationId) return;
+  const prevChatRef = useRef<string | null>(null);
+  const typingTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
 
-      setLoading(true);
-      try {
-        const data = await getChatMessages(conversationId);
-        setMessages(Array.isArray(data) ? data : [data]);
-        setActiveChatId(conversationId);
-
-        // Join the socket room
-        socket?.emit("joinChat", conversationId);
-      } catch (error) {
-        console.error("Failed to fetch messages:", error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [socket]
-  );
-
-  // -------------------------
-  // Send a new message
-  // -------------------------
-  const sendNewMessage = useCallback(
-    async (payload: SendMessageData, tempMsg?: UIMessage) => {
-      try {
-        if (tempMsg) {
-          setMessages((prev) => [...prev, tempMsg]);
-        }
-
-        const newMsg: Message = await sendMessage(payload);
-
-        setMessages((prev) =>
-          tempMsg ? prev.map((msg) => (msg._id === tempMsg._id ? newMsg : msg)) : [...prev, newMsg]
-        );
-
-        conversationContext?.handleExternalMessageUpdate(newMsg, false);
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        throw error;
-      }
-    },
-    [conversationContext]
-  );
-
-  // -------------------------
-  // Update a message
-  // -------------------------
-  const updateMessage = useCallback(
-    async (messageId: string, data: UpdateMessageData) => {
-      try {
-        setMessages((prev) =>
-          prev.map((msg) => (msg._id === messageId ? { ...msg, ...data, updatedAt: new Date().toISOString() } : msg))
-        );
-
-        if (socket && isConnected) {
-          socket.emit("updateMessage", { messageId, ...data });
-        }
-
-        const updated = await updateChatMessage(messageId, data);
-
-        setMessages((prev) => prev.map((msg) => (msg._id === updated._id ? updated : msg)));
-
-        conversationContext?.handleExternalMessageUpdate(updated, false);
-      } catch (error) {
-        console.error("Failed to update message:", error);
-        throw error;
-      }
-    },
-    [socket, isConnected, conversationContext]
-  );
-
-  // -------------------------
-  // Delete a message
-  // -------------------------
-  const deleteMessage = useCallback(
-    async (messageId: string) => {
-      try {
-        setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
-
-        if (socket && isConnected) {
-          socket.emit("deleteMessage", { messageId });
-        }
-
-        await deleteChatMessage(messageId);
-      } catch (error) {
-        console.error("Failed to delete message:", error);
-        throw error;
-      }
-    },
-    [socket, isConnected]
-  );
-
-  // -------------------------
-  // Global socket listeners
-  // -------------------------
+  // -----------------------------
+  // Join / Leave Chat Room
+  // -----------------------------
   useEffect(() => {
-    if (!socket) return;
+    if (!activeChatId) return;
 
-    // --- Receive messages for all conversations ---
-    const handleReceiveMessage = (msg: UIMessage) => {
-      setMessages((prev) => {
-        if (!prev.some((m) => m._id === msg._id)) {
-          return [...prev, msg];
-        }
-        return prev;
-      });
-
-      conversationContext?.handleExternalMessageUpdate(msg, true);
-    };
-
-    // --- Handle typing ---
-    const handleTyping = (data: { conversationId: string; userId: string; isTyping: boolean }) => {
-      setTypingUsers((prev) => ({
-        ...prev,
-        [data.userId]: data.isTyping,
-      }));
-
-      if (data.isTyping) {
-        setTimeout(() => {
-          setTypingUsers((prev) => ({ ...prev, [data.userId]: false }));
-        }, 3000);
-      }
-    };
-
-    socket.on("receiveMessage", handleReceiveMessage);
-    socket.on("userTyping", handleTyping);
+    if (prevChatRef.current) leaveChat(prevChatRef.current);
+    joinChat(activeChatId);
+    prevChatRef.current = activeChatId;
 
     return () => {
-      socket.off("receiveMessage", handleReceiveMessage);
-      socket.off("userTyping", handleTyping);
+      if (activeChatId) leaveChat(activeChatId);
     };
-  }, [socket, conversationContext]);
+  }, [activeChatId, joinChat, leaveChat]);
 
+  // -----------------------------
+  // Fetch Messages
+  // -----------------------------
+  const fetchMessages = useCallback(async (conversationId: string) => {
+    if (!conversationId) return;
+    setLoading(true);
+    try {
+      const data: UIMessage[] = await getChatMessages(conversationId);
+      setMessages(data);
+      setActiveChatId(conversationId);
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // -----------------------------
+  // Refresh Messages
+  // -----------------------------
   const refreshMessages = useCallback(async () => {
     if (activeChatId) await fetchMessages(activeChatId);
   }, [activeChatId, fetchMessages]);
+
+  // -----------------------------
+  // Send Message
+  // -----------------------------
+  const sendNewMessage = useCallback(
+  async (payload: SendMessagePayload) => {
+    if (!activeChatId) return;
+
+    try {
+      let attachments:Attachment[] = [];
+
+      if (payload.files && payload.files.length > 0) {
+        attachments = await uploadMessageAttachments(payload.files);
+      }
+
+      sendSocketMessage({
+        sender: payload.sender,
+        conversationId: payload.conversationId,
+        content: payload.content,
+        messageType: attachments.length ? "file" : "text",
+        attachments, 
+      });
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
+  },
+  [sendSocketMessage, activeChatId]
+);
+
+  // -----------------------------
+  // Update Message
+  // -----------------------------
+  const updateMessage = useCallback(
+    (messageId: string, content: string) => {
+      
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId
+            ? { ...msg, content, updatedAt: new Date().toISOString() }
+            : msg
+        )
+      );
+      updateMessageSocket({ messageId, content });
+    },
+    [updateMessageSocket]
+  );
+
+  // -----------------------------
+  // Delete Message
+  // -----------------------------
+  const deleteMessage = useCallback(
+    (messageId: string) => {
+      if (!activeChatId) return;
+
+      // Optimistic UI update
+      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+
+      console.log("Emitting deleteMessage:", {
+        messageId,
+        roomId: activeChatId,
+      });
+
+      deleteMessageSocket({
+        roomId: activeChatId,
+        messageId,
+      });
+    },
+    [deleteMessageSocket, activeChatId]
+  );
+  // -----------------------------
+  // Reaction on Message
+  // -----------------------------
+
+  const reactToMessage = useCallback(
+  (messageId: string, emoji: string) => {
+    reactMessageSocket({ messageId, emoji });
+  },
+  [reactMessageSocket,activeChatId]
+);
+
+  // -----------------------------
+  // Typing Emit
+  // -----------------------------
+  const emitTypingEvent = useCallback(
+    (isTyping: boolean) => {
+      if (!activeChatId) return;
+      emitTyping(activeChatId, isTyping);
+    },
+    [activeChatId, emitTyping]
+  );
+
+
+
+  // -----------------------------
+  // Setup Socket Handlers
+  // -----------------------------
+  useEffect(() => {
+    const cleanup = setupMessageHandlers(
+      // receiveMessage
+      (msg: UIMessage) => {
+        console.log("RECEIVE EVENT:", msg);
+
+        if (!msg.content || !msg?.sender) return;
+
+        // Only update conversation preview if it's the active one
+        if (msg.conversationId === activeChatId) {
+          conversationContext?.handleExternalMessageUpdate(msg, true);
+
+          setMessages((prev) => {
+            if (!prev.some((m) => m._id === msg._id)) {
+              return [...prev, msg];
+            }
+            return prev;
+          });
+        }
+      },
+
+      // messageSent (unused)
+      () => {},
+
+      //  typing
+      (data: {
+        conversationId: string;
+        userId: string;
+        isTyping: boolean;
+      }) => {
+        if (data.conversationId !== activeChatId) return;
+
+        setTypingUsers((prev) => ({
+          ...prev,
+          [data.userId]: data.isTyping,
+        }));
+
+        if (typingTimeouts.current[data.userId]) {
+          clearTimeout(typingTimeouts.current[data.userId]);
+        }
+
+        if (data.isTyping) {
+          typingTimeouts.current[data.userId] = setTimeout(() => {
+            setTypingUsers((prev) => ({
+              ...prev,
+              [data.userId]: false,
+            }));
+          }, 3000);
+        }
+      },
+
+      // error
+      (error) => console.error("Socket error:", error),
+
+      // onMessageUpdate
+      (updated: UIMessage) => {
+        setMessages((prev) =>
+          prev.map((msg) => (msg._id === updated._id ? updated : msg))
+        );
+      },
+
+      // onMessageDelete
+      ({ messageId }: { messageId: string }) => {
+        setMessages((prev) =>
+          prev.filter((msg) => msg._id !== messageId)
+        );
+      },
+       // ✅ reactionUpdate
+      ({ messageId, reactions }: { messageId: string; reactions: any[] }) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === messageId
+              ? { ...msg, reactions }
+              : msg
+          )
+        );
+      }
+    );
+
+    return cleanup;
+  }, [setupMessageHandlers, activeChatId, conversationContext]);
 
   return (
     <MessageContext.Provider
@@ -185,8 +284,10 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         sendNewMessage,
         updateMessage,
         deleteMessage,
+        reactToMessage,
         setActiveChat: setActiveChatId,
         refreshMessages,
+        emitTypingEvent,
       }}
     >
       {children}

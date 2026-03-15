@@ -10,13 +10,13 @@ import { useSocket } from "@/features/chat/context/SocketContext";
 
 export interface ConversationContextProps {
   conversations: Conversation[];
+  activeConversation: Conversation | null;
+  setActiveConversation: (conv: Conversation) => void;
   loading: boolean;
-  createNewConversation: (data: CreateConversationData) => Promise<void>;
+  createNewConversation: (data: CreateConversationData) => Promise<Conversation>;
   removeConversation: (id: string) => Promise<void>;
   refreshConversations: () => Promise<void>;
   markConversationAsRead: (id: string) => void;
-
-  // 🔥 New: used by MessageProvider
   handleExternalMessageUpdate: (message: any, isUnread?: boolean) => void;
 }
 
@@ -25,7 +25,9 @@ export const ConversationContext = createContext<ConversationContextProps | unde
 export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const { socket, setupMessageHandlers, joinChat } = useSocket();
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(false);
 
   const resolveConversationId = (message: any): string | null => {
@@ -51,7 +53,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           ? {
               ...existing,
               latestMessage: message,
-              updatedAt: new Date().toISOString(), // force new timestamp
+              updatedAt: new Date().toISOString(),
               unreadCount: isUnread
                 ? (existing.unreadCount || 0) + 1
                 : existing.unreadCount || 0,
@@ -68,8 +70,6 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             };
 
         const filtered = prev.filter(c => c._id !== convId);
-
-        // 🚀 Always force top
         return [updated, ...filtered];
       });
     },
@@ -101,12 +101,14 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       socket.emit("conversation:create", newConv);
       joinChat(newConv._id);
     }
+    return newConv; // 🔥 Return the conversation so caller can use it
   };
 
   const removeConversation = async (id: string) => {
     await deleteConversation(id);
     setConversations(prev => prev.filter(c => c._id !== id));
     if (socket?.connected) socket.emit("conversation:delete", id);
+    if (activeConversation?._id === id) setActiveConversation(null);
   };
 
   const markConversationAsRead = (id: string) => {
@@ -122,15 +124,24 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     refreshConversations();
 
     const cleanup = setupMessageHandlers(
-      (msg) => mergeMessageIntoConversations(msg, msg.sender?._id !== user._id),
-      (msg) => mergeMessageIntoConversations(msg, false),
-      () => {},
-      (err) => console.error(err),
-      (msg) => mergeMessageIntoConversations(msg, false),
-      (msg) => mergeMessageIntoConversations(msg, false),
-      (conv) => setConversations(prev => [conv, ...prev]),
-      (id) => setConversations(prev => prev.filter(c => c._id !== id))
-    );
+        // receiveMessage ONLY
+        (msg) => {
+          if (!msg?.conversationId || !msg?.sender) return;
+
+          mergeMessageIntoConversations(
+            msg,
+            msg.sender?._id !== user._id
+          );
+        },
+
+        () => {}, // messageSent
+        () => {}, // typing
+        (err) => console.error(err),
+        () => {}, // messageUpdated
+        () => {}, // messageDeleted
+        () => {}, // reaction (IGNORE)
+        () => {}, // conversationCreated
+      );
 
     return () => {
       cleanup();
@@ -142,12 +153,14 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     <ConversationContext.Provider
       value={{
         conversations,
+        activeConversation,
+        setActiveConversation,
         loading,
         createNewConversation,
         removeConversation,
         refreshConversations,
         markConversationAsRead,
-        handleExternalMessageUpdate: mergeMessageIntoConversations, // 🔥 exposed
+        handleExternalMessageUpdate: mergeMessageIntoConversations,
       }}
     >
       {children}

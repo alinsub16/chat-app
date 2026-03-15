@@ -3,21 +3,37 @@ import { useSearchUsers } from "@/features/search/hooks/useSearchUsers";
 import { Input } from "@/components/ui/Input";
 import { Atom } from "react-loading-indicators";
 import { useConversation } from "@/features/chat/hooks/useConversation";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const UserSearch = () => {
   const [query, setQuery] = useState("");
   const { users, loading, error, searchUsers } = useSearchUsers(300);
-  const {createNewConversation} = useConversation();
+  const { conversations, createNewConversation, setActiveConversation } = useConversation();
+  const { user } = useAuth(); // current logged-in user
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    searchUsers(value); 
+    searchUsers(value);
   };
+
   const handleUserClick = async (userId: string) => {
+    if (userId === user?._id) return; // ❌ do nothing if clicked self
+
     try {
-      await createNewConversation({ receiverId: userId });
-      setQuery(""); 
+      // Check if conversation already exists
+      const existing = conversations.find(
+        (conv) => conv.participants?.some((member) => member._id === userId)
+      );
+
+      if (existing) {
+        setActiveConversation(existing); // just set active
+      } else {
+        const newConv = await createNewConversation({ receiverId: userId });
+        setActiveConversation(newConv); // set newly created
+      }
+
+      setQuery(""); // Clear search input
     } catch (err) {
       console.error(err);
     }
@@ -32,27 +48,35 @@ const UserSearch = () => {
         value={query}
         onChange={handleChange}
         placeholder="Search users..."
-        className="w-full border py-1 px-4 rounded-3xl "
+        className="w-full border py-1 px-4 rounded-3xl"
         variant="search_input"
       />
 
-
-      {loading && <span className="absolute top-10 left-1/2 transform -translate-x-1/2 z-10" ><Atom color="#c6ddc6" size="small" textColor="#643c3c" /></span>}
+      {loading && (
+        <span className="absolute top-10 left-1/2 transform -translate-x-1/2 z-10">
+          <Atom color="#c6ddc6" size="small" textColor="#643c3c" />
+        </span>
+      )}
       {error && <p className="text-red-500">{error}</p>}
 
-      {(query.trim() !== "") && (
+      {query.trim() !== "" && (
         <div className="absolute z-10 bg-gray-700 w-full max-w-lg shadow-lg rounded mt-1">
           <ul className="mt-2 max-h-60 overflow-y-auto">
             {users.length > 0 ? (
-              users.map((user) => (
-                <li
-                  key={user._id}
-                  className="p-2 border-b hover:bg-gray-800 cursor-pointer"
-                  onClick={() => handleUserClick(user._id)}
-                >
-                  {user.firstName} {user.lastName}
-                </li>
-              ))
+              users.map((u) => {
+                const isCurrentUser = u._id === user?._id;
+                return (
+                  <li
+                    key={u._id}
+                    className={`p-2 border-b cursor-pointer hover:bg-gray-800 ${
+                      isCurrentUser ? "cursor-not-allowed opacity-50" : ""
+                    }`}
+                    onClick={() => handleUserClick(u._id)}
+                  >
+                    {u.firstName} {u.lastName} {isCurrentUser && "(Me)"}
+                  </li>
+                );
+              })
             ) : showNoUsers ? (
               <li className="p-2 text-gray-500">No users found</li>
             ) : null}

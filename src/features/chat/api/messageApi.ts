@@ -1,5 +1,5 @@
 import api from "@/services/axiosInstance";
-import { Message, SendMessageData, UpdateMessageData } from "@/features/chat/types/messageTypes";
+import { Message, SendMessageData, UpdateMessageData,Attachment,UploadAttachmentsResponse } from "@/features/chat/types/messageTypes";
 
 // Send a new message
 export const sendMessage = async (data: SendMessageData): Promise<Message> => {
@@ -29,4 +29,24 @@ export const updateChatMessage = async (
 ): Promise<Message> => {
   const res = await api.put<Message>(`/messages/${chatId}`, data);
   return res.data;
+};
+
+
+//Upload file in message
+export const uploadMessageAttachments = async (
+  files: File[]
+): Promise<Attachment[]> => {
+    const formData = new FormData();
+
+    // Ensure key matches backend (e.g., "files")
+    files.forEach((file) => formData.append("files", file));
+
+    // Let Axios set the multipart/form-data headers
+    const res = await api.post<UploadAttachmentsResponse>(
+      "/uploads/attachment",
+      formData
+    );
+
+    return res.data.attachments;
+
 };

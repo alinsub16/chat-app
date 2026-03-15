@@ -1,28 +1,41 @@
 import React, { useState, useRef, useEffect } from "react";
 import ChatMessage from "@features/chat/components/ChatMessage";
 import { useMessages } from "@features/chat/hooks/useMessage";
-import { SendMessageData, UIMessage } from "@/features/chat/types/messageTypes";
+import { UIMessage } from "@/features/chat/types/messageTypes";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useConversation } from "@/features/chat/hooks/useConversation";
-import { useSocket } from "@/features/chat/hooks/useSocket";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import ProfileHeader from "@/features/chat/layout/ProfileHeader";
+import { Paperclip, X } from "lucide-react";
+import MessageSkeleton from "@/features/chat/components/MessageSkeleton";
 
 const Chat: React.FC = () => {
   const [input, setInput] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
-  const { messages, typingUsers, sendNewMessage, activeChatId, deleteMessage, updateMessage } =
-    useMessages();
+  const {
+    messages,
+    typingUsers,
+    sendNewMessage,
+    activeChatId,
+    deleteMessage,
+    updateMessage,  
+    reactToMessage,
+    emitTypingEvent,
+  } = useMessages();
+
   const { conversations } = useConversation();
   const { user } = useAuth();
-  const { emitTyping } = useSocket();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // -------------------------
-  // Scroll to bottom on new messages
+  // Scroll to bottom
   // -------------------------
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,7 +44,9 @@ const Chat: React.FC = () => {
   // -------------------------
   // Active conversation info
   // -------------------------
-  const activeConversation = conversations.find((convo) => convo._id === activeChatId);
+  const activeConversation = conversations.find(
+    (convo) => convo._id === activeChatId
+  );
 
   const otherParticipant = activeConversation?.participants?.find(
     (p) => String(p._id) !== String(user?._id)
@@ -42,6 +57,18 @@ const Chat: React.FC = () => {
     : "Unknown User";
 
   const profilePicture = otherParticipant?.profilePicture ?? "/avatar.jpg";
+
+  // -------------------------
+  // File select
+  // -------------------------
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    setFiles(Array.from(e.target.files));
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   // -------------------------
   // Message edit
@@ -61,38 +88,31 @@ const Chat: React.FC = () => {
   // Send or save message
   // -------------------------
   const handleSubmit = async () => {
-    if (!input.trim() || !user || !activeChatId) return;
+    if ((!input.trim() && files.length === 0) || !user || !activeChatId) return;
 
     if (editingMessageId) {
-      await updateMessage(editingMessageId, { content: input });
+      updateMessage(editingMessageId, input);
       setEditingMessageId(null);
       setInput("");
       return;
     }
 
-    const payload: SendMessageData = {
-      conversationId: activeChatId,
-      content: input,
-      messageType: "text",
-      attachments: [],
-    };
+    try {
+      setIsSending(true);
 
-    const tempMsg: UIMessage = {
-      _id: Date.now().toString(),
-      sender: user,
-      content: input,
-      conversationId: activeChatId,
-      messageType: "text",
-      attachments: [],
-      readBy: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      __v: 0,
-      status: "sending",
-    };
+      await sendNewMessage({
+        sender: user,
+        conversationId: activeChatId,
+        content: input,
+        messageType: files.length > 0 ? "file" : "text",
+        files,
+      });
 
-    sendNewMessage(payload, tempMsg);
-    setInput("");
+      setInput("");
+      setFiles([]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   // -------------------------
@@ -103,56 +123,71 @@ const Chat: React.FC = () => {
     if (e.key === "Escape" && editingMessageId) cancelEditing();
   };
 
-  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInput(value);
 
     if (!activeChatId || !user) return;
 
-    emitTyping(activeChatId, value.length > 0);
+    emitTypingEvent(value.length > 0);
 
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
+
     typingTimeout.current = setTimeout(() => {
-      emitTyping(activeChatId, false);
+      emitTypingEvent(false);
     }, 1500);
   };
 
   // -------------------------
-  // Filter messages for active conversation
+  // Messages filter
   // -------------------------
-  const messagesForActiveChat = messages.filter((msg) => msg.conversationId === activeChatId);
+  const messagesForActiveChat = messages.filter(
+    (msg) => msg.conversationId === activeChatId
+  );
 
   return (
     <div className="flex flex-col flex-1 bg-gray-900 overflow-hidden">
-      {/* Header */}
-      <ProfileHeader name={headerName} avatarUrl={profilePicture} onTabChange={() => {}} />
+      <ProfileHeader
+        name={headerName}
+        avatarUrl={profilePicture}
+        onTabChange={() => {}}
+      />
 
-      {/* Body */}
       <div className="flex flex-col flex-1 overflow-hidden px-40">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">
           {messagesForActiveChat.map((msg) => {
-            const isOwnMessage = msg.sender._id === user?._id;
-            const name = !isOwnMessage ? `${msg.sender.firstName} ${msg.sender.lastName}` : "";
+            const isOwnMessage = msg.sender?._id === user?._id;
+
+            const name = !isOwnMessage
+              ? `${msg.sender.firstName} ${msg.sender.lastName}`
+              : "";
+            
 
             return (
               <ChatMessage
-                key={msg._id}
-                name={name}
-                message={msg.content}
-                sender={isOwnMessage ? "user" : "other"}
-                timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-                onDeleteClick={() => deleteMessage(msg._id!)}
-                onEditClick={() => startEditing(msg)}
-              />
+              key={msg._id}
+              name={name}
+              message={msg.content}
+              sender={isOwnMessage ? "user" : "other"}
+              timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+              attachments={msg.attachments}
+              reactions={msg.reactions}
+              onReact={(emoji) => reactToMessage( msg._id, emoji )}
+              onDeleteClick={() => deleteMessage(msg._id!)}
+              onEditClick={() => startEditing(msg)}
+            />
             );
           })}
+          {/* Skeleton while sending */}
+          {isSending && <MessageSkeleton />}
+
+          {/* Auto scroll to bottom */}
           <div ref={messagesEndRef} />
+          
         </div>
 
         {/* Typing indicator */}
@@ -163,39 +198,85 @@ const Chat: React.FC = () => {
               const typingUser = activeConversation?.participants.find(
                 (p) => String(p._id) === String(userId)
               );
-              return typingUser ? `${typingUser.firstName} is typing...` : null;
+
+              return typingUser ? (
+                <div key={userId}>{typingUser.firstName} is typing...</div>
+              ) : null;
             })}
         </div>
 
-        {/* Input */}
-        <div className="border-t border-gray-700 p-4 flex gap-2 bg-gray-900 items-center">
-          {editingMessageId && (
-            <span className="text-xs text-gray-400 mr-2">Editing message</span>
+        {/* Input Area */}
+        <div className="border-t border-gray-700 p-4 flex flex-col gap-2 bg-gray-900">
+
+          {/* Selected Files Preview */}
+          {files.length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {files.map((file, index) => (
+                <div
+                  key={index}
+                  className="text-xs bg-gray-800 px-2 py-1 rounded flex items-center gap-2"
+                >
+                  {file.name}
+                  <button
+                    onClick={() => removeFile(index)}
+                    className="text-red-400"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
 
-          <Input
-            type="text"
-            variant="type_input"
-            placeholder={editingMessageId ? "Edit your message..." : "Type a message..."}
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyPress}
+          {/* Input Row */}
+          <div className="flex gap-2 items-center">
+
+            {/* File Upload */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            className="hidden"
           />
 
-          {editingMessageId && (
-            <button
-              onClick={cancelEditing}
-              className="text-xs text-gray-400 hover:text-gray-200 transition"
-            >
-              Cancel
-            </button>
-          )}
+          {/* Attach Button */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition"
+          >
+            <Paperclip size={18} className="text-gray-300" />
+          </button>
 
-          <Button
-            text={editingMessageId ? "Save" : "Send"}
-            className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-            onClick={handleSubmit}
-          />
+            <Input
+              type="text"
+              variant="type_input"
+              placeholder={
+                editingMessageId
+                  ? "Edit your message..."
+                  : "Type a message..."
+              }
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyPress}
+            />
+
+            {editingMessageId && (
+              <button
+                onClick={cancelEditing}
+                className="text-xs text-gray-400 hover:text-gray-200"
+              >
+                Cancel
+              </button>
+            )}
+
+            <Button
+              text={editingMessageId ? "Save" : "Send"}
+              className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+              onClick={handleSubmit}
+            />
+          </div>
         </div>
       </div>
     </div>
