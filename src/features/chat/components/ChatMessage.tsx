@@ -17,6 +17,7 @@ interface ChatMessageProps {
   attachments?: Attachment[];
   reactions?: Reaction[];
   onReact?: (emoji: string) => void;
+  onImageClick?: (imageUrl: string) => void;
   onEditClick?: () => void;
   onDeleteClick?: () => void;
 }
@@ -32,6 +33,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   attachments = [],
   reactions = [],
   onReact,
+  onImageClick,
   onEditClick,
   onDeleteClick,
 }) => {
@@ -57,7 +59,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     onDeleteClick?.();
   };
 
-  // 🟢 Long press (mobile)
+  // Long press (mobile)
   const handlePressStart = () => {
     pressTimer.current = setTimeout(() => {
       setShowReactions(true);
@@ -137,7 +139,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                       key={index}
                       src={att.url}
                       alt={att.fileName || "attachment"}
-                      className="rounded-md max-w-xs"
+                      className="rounded-md max-w-xs cursor-pointer"
+                      onClick={() => onImageClick?.(att.url)}
                     />
                   );
                 } else if (att.fileType === "video") {

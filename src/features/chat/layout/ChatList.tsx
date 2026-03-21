@@ -4,6 +4,7 @@ import { useConversation } from "@/features/chat/hooks/useConversation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMessages } from "@features/chat/hooks/useMessage";
 import { Atom } from "react-loading-indicators";
+import ConversationListSkeleton from "@/features/chat/components/ConversationListSkeleton";
 
 const ChatList = () => {
   const { conversations, loading, removeConversation } = useConversation();
@@ -15,7 +16,7 @@ const ChatList = () => {
 };
 
   if (loading) {
-    return <div className="text-gray-400 p-4"><Atom color="#c6ddc6" size="small" textColor="#643c3c" /></div>;
+    return <ConversationListSkeleton />
   }
 
   if (!conversations || conversations.length === 0) {

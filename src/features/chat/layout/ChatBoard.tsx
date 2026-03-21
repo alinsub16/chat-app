@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect,useLayoutEffect } from "react";
 import ChatMessage from "@features/chat/components/ChatMessage";
 import { useMessages } from "@features/chat/hooks/useMessage";
 import { UIMessage } from "@/features/chat/types/messageTypes";
@@ -9,12 +9,17 @@ import { Button } from "@/components/ui/Button";
 import ProfileHeader from "@/features/chat/layout/ProfileHeader";
 import { Paperclip, X } from "lucide-react";
 import MessageSkeleton from "@/features/chat/components/MessageSkeleton";
+import ChatFilesView from "@/features/chat/components/ChatFilesView";
+import ImageViewer from "@/features/chat/components/ImageViewer";
+
 
 const Chat: React.FC = () => {
   const [input, setInput] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [activeTab, setActiveTab] = useState("chat");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const {
     messages,
@@ -37,9 +42,11 @@ const Chat: React.FC = () => {
   // -------------------------
   // Scroll to bottom
   // -------------------------
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, activeChatId]);
+  useLayoutEffect(() => {
+  if (activeTab !== "chat") return;
+
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages, activeChatId, activeTab]);
 
   // -------------------------
   // Active conversation info
@@ -150,46 +157,56 @@ const Chat: React.FC = () => {
       <ProfileHeader
         name={headerName}
         avatarUrl={profilePicture}
-        onTabChange={() => {}}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
 
       <div className="flex flex-col flex-1 overflow-hidden px-40">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">
-          {messagesForActiveChat.map((msg) => {
-            const isOwnMessage = msg.sender?._id === user?._id;
+        {activeTab === "chat" ? (
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">
+            {messagesForActiveChat.map((msg) => {
+              const isOwnMessage = msg.sender?._id === user?._id;
 
-            const name = !isOwnMessage
-              ? `${msg.sender.firstName} ${msg.sender.lastName}`
-              : "";
-            
+              const name = !isOwnMessage
+                ? `${msg.sender.firstName} ${msg.sender.lastName}`
+                : "";
 
-            return (
-              <ChatMessage
-              key={msg._id}
-              name={name}
-              message={msg.content}
-              sender={isOwnMessage ? "user" : "other"}
-              timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              attachments={msg.attachments}
-              reactions={msg.reactions}
-              onReact={(emoji) => reactToMessage( msg._id, emoji )}
-              onDeleteClick={() => deleteMessage(msg._id!)}
-              onEditClick={() => startEditing(msg)}
+              return (
+                <ChatMessage
+                  key={msg._id}
+                  name={name}
+                  message={msg.content}
+                  sender={isOwnMessage ? "user" : "other"}
+                  timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                  attachments={msg.attachments}
+                  reactions={msg.reactions}
+                  onImageClick={(url) => setSelectedImage(url)}
+                  onReact={(emoji) => reactToMessage(msg._id, emoji)}
+                  onDeleteClick={() => deleteMessage(msg._id!)}
+                  onEditClick={() => startEditing(msg)}
+                />
+              );
+            })}
+
+            {isSending && <MessageSkeleton />}
+            {selectedImage && (
+            <ImageViewer
+              imageUrl={selectedImage}
+              onClose={() => setSelectedImage(null)}
             />
-            );
-          })}
-          {/* Skeleton while sending */}
-          {isSending && <MessageSkeleton />}
+          )}
 
-          {/* Auto scroll to bottom */}
-          <div ref={messagesEndRef} />
-          
-        </div>
-
+            <div ref={messagesEndRef} />
+          </div>
+        ) : (
+          <ChatFilesView messages={messagesForActiveChat} />
+        )}
+        {activeTab === "chat" && (
+        <>
         {/* Typing indicator */}
         <div className="text-xs text-gray-400 h-5 px-2">
           {Object.entries(typingUsers)
@@ -278,6 +295,8 @@ const Chat: React.FC = () => {
             />
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
