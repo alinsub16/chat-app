@@ -1,4 +1,3 @@
-// src/api/conversation.ts
 import api from "@/services/axiosInstance";
 import { Conversation, CreateConversationData, ConversationsResponse} from "@/features/chat/types/conversationTypes";
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import UserSearch from '@/features/search/components/SearchComponent'
+import UserProfileMenu from '@/features/userProfile/components/UserProfileMenu'
 
 
 const Header = () => {
@@ -12,7 +13,7 @@ const Header = () => {
             <UserSearch />
         </div>
         <div>
-            <p>User Profile</p>
+            <UserProfileMenu />
         </div>
     </header>
   )

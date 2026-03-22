@@ -1,7 +1,7 @@
 import React from "react";
 import ChatListItem from "@/features/chat/components/ChatListItem";
 import { useConversation } from "@/features/chat/hooks/useConversation";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import { useMessages } from "@features/chat/hooks/useMessage";
 import { Atom } from "react-loading-indicators";
 import ConversationListSkeleton from "@/features/chat/components/ConversationListSkeleton";
@@ -9,7 +9,7 @@ import ConversationListSkeleton from "@/features/chat/components/ConversationLis
 const ChatList = () => {
   const { conversations, loading, removeConversation } = useConversation();
   const { fetchMessages } = useMessages();
-  const { user} = useAuth(); 
+  const { user} = useProfile(); 
 
  const handleDeleteConversation = (id: string) => {
   removeConversation(id);

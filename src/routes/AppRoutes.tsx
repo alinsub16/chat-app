@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@features/auth/hooks/useAuth";
+import { useProfile } from "@features/userProfile/hooks/useProfile";
 
 // Pages
 import Login from "@/features/auth/pages/Login";
@@ -9,7 +9,7 @@ import LoginPage from "@/pages/LoginPage";
 import ChatDashboard from "@/pages/ChatDashboard";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useProfile();
 
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/" replace />;

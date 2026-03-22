@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect,useLayoutEffect } from "react";
 import ChatMessage from "@features/chat/components/ChatMessage";
 import { useMessages } from "@features/chat/hooks/useMessage";
 import { UIMessage } from "@/features/chat/types/messageTypes";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import { useConversation } from "@/features/chat/hooks/useConversation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -33,7 +33,7 @@ const Chat: React.FC = () => {
   } = useMessages();
 
   const { conversations } = useConversation();
-  const { user } = useAuth();
+  const { user } = useProfile();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);

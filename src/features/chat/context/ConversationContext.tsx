@@ -5,7 +5,7 @@ import {
   deleteConversation,
 } from "@/features/chat/api/conversationApi";
 import { Conversation, CreateConversationData } from "@/features/chat/types/conversationTypes";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import { useSocket } from "@/features/chat/context/SocketContext";
 
 export interface ConversationContextProps {
@@ -23,7 +23,7 @@ export interface ConversationContextProps {
 export const ConversationContext = createContext<ConversationContextProps | undefined>(undefined);
 
 export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user } = useProfile();
   const { socket, setupMessageHandlers, joinChat } = useSocket();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);

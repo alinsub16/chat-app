@@ -16,10 +16,10 @@ const ChatDashboard = () => {
         <Header />
 
         {/* Chat Area */}
-        <div className="flex flex-1 overflow-hidden">
+        <main className="flex flex-1 overflow-hidden">
           <ChatList />
           <ChatBoard />
-        </div>
+        </main>
       </div>
     </div>
   );

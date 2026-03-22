@@ -3,13 +3,13 @@ import { useSearchUsers } from "@/features/search/hooks/useSearchUsers";
 import { Input } from "@/components/ui/Input";
 import { Atom } from "react-loading-indicators";
 import { useConversation } from "@/features/chat/hooks/useConversation";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useProfile } from "@/features/userProfile/hooks/useProfile";
 
 const UserSearch = () => {
   const [query, setQuery] = useState("");
   const { users, loading, error, searchUsers } = useSearchUsers(300);
   const { conversations, createNewConversation, setActiveConversation } = useConversation();
-  const { user } = useAuth(); // current logged-in user
+  const { user } = useProfile();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -18,7 +18,7 @@ const UserSearch = () => {
   };
 
   const handleUserClick = async (userId: string) => {
-    if (userId === user?._id) return; // ❌ do nothing if clicked self
+    if (userId === user?._id) return;
 
     try {
       // Check if conversation already exists

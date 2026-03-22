@@ -1,136 +1,120 @@
-// src/context/AuthContext.tsx
-import React, { createContext, useState, useEffect, ReactNode} from "react";
-import { User, AuthResponse, LoginData, RegisterData } from "@/features/auth/types/auth";
-import { loginUser, registerUser, getProfile, updateProfile, changePassword, changeEmail } from "@/features/auth/api/auth";
+import React, { createContext, useState, ReactNode } from "react";
+import { AuthResponse, LoginData, RegisterData } from "@/features/auth/types/auth";
+import { loginUser, registerUser } from "@/features/auth/api/auth";
 
+/**
+ * Defines the shape of the Auth Context
+ * This ensures type safety across the app when consuming auth data
+ */
 interface AuthContextType {
-  user: User | null;
   token: string | null;
-  loading: boolean;       // for profile fetch
-  authLoading: boolean;   // for login/register actions
+  authLoading: boolean;
   error: string | null;
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
-  refreshProfile: () => Promise<void>;
-  updateProfile: (data: Partial<User>) => Promise<void>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
-  changeEmail: (currentPassword: string, newEmail: string) => Promise<void>;
 }
 
+/**
+ * Create Auth Context
+ * Starts as undefined to enforce usage inside AuthProvider
+ */
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * AuthProvider
+ * Responsible for handling authentication state and exposing auth actions
+ */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-  const [loading, setLoading] = useState(true);
+  
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token")
+  );
   const [authLoading, setAuthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch profile on mount
-useEffect(() => {
-  const fetchProfile = async () => {
+  /**
+   * Handles user login
+   * - Calls API
+   * - Stores token in state and localStorage
+   * - Handles error properly
+   */
+  const login = async (data: LoginData) => {
+    setAuthLoading(true);
+    setError(null); 
+
     try {
-      if (token) {
-        const profile = await getProfile();
-        setUser(profile.user);
-        console.log("PROFILE RESULT:", user);
-      } else {
-        setUser(null);
-      }
-    } catch (err:any) {
-      console.error("Failed to fetch profile:", err);
-      logout();
+      const res: AuthResponse = await loginUser(data);
+      setToken(res.token);
+      localStorage.setItem("token", res.token);
+
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Login failed";
+
+      setError(message);
+
+      throw new Error(message);
+
     } finally {
-      setLoading(false); 
+      setAuthLoading(false);
     }
   };
-  fetchProfile();
-}, [token]);
 
-const login = async (data: LoginData) => {
-  setAuthLoading(true);
-  setError(null);
-  try {
-    const res: AuthResponse = await loginUser(data);
-    setUser(res.user);
-    setToken(res.token);
-    localStorage.setItem("token", res.token);
-  } catch (err: any) {
-    const errorMessage =
-      err.response?.data?.message ||
-      err.response?.data?.error ||
-      "Login failed";
-    setError(errorMessage);
-    throw new Error(errorMessage); // ✅ Rethrow for AuthForm to catch
-  } finally {
-    setAuthLoading(false);
-  }
-};
+  /**
+   * Handles user registration
+   */
+  const register = async (data: RegisterData) => {
+    setAuthLoading(true);
+    setError(null);
 
-const register = async (data: RegisterData) => {
-  setAuthLoading(true);
-  setError(null);
-  try {
-    const res: AuthResponse = await registerUser(data);
-    setUser(res.user);
-    setToken(res.token);
-    localStorage.setItem("token", res.token);
-  } catch (err: any) {
-    const errorMessage =
-      err.response?.data?.message ||
-      err.response?.data?.error ||
-      "Registration failed";
-    setError(errorMessage);
-    throw new Error(errorMessage); // ✅ Correct variable
-  } finally {
-    setAuthLoading(false);
-  }
-};
-
-  const refreshProfile = async () => {
     try {
-      const profile = await getProfile();
-      
-      setUser(profile.user);
- 
-    } catch {
-      logout();
+      const res: AuthResponse = await registerUser(data);
+
+      // Save token after successful registration
+      setToken(res.token);
+      localStorage.setItem("token", res.token);
+
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Registration failed";
+
+      setError(message);
+      throw new Error(message);
+
+    } finally {
+      setAuthLoading(false);
     }
   };
 
+  /**
+   * Logs out the user
+   */
   const logout = () => {
-    setUser(null);
     setToken(null);
     localStorage.removeItem("token");
   };
 
+  /**
+   * AuthContext Provider
+   * Makes auth state and functions available globally to the app
+   */
   return (
     <AuthContext.Provider
       value={{
-        user,
         token,
-        loading,
         authLoading,
         error,
         login,
         register,
         logout,
-        refreshProfile,
-        updateProfile: async (data) => {
-          const updated = await updateProfile(data);
-          setUser(updated);
-        },
-        changePassword: async (curr, next) => {
-          await changePassword(curr, next);
-        },
-        changeEmail: async (curr, next) => {
-          await changeEmail(curr, next);
-        },
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
-
