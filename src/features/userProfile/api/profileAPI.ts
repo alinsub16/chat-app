@@ -17,16 +17,18 @@ export const updateProfile = async (data: Partial<User>): Promise<User> => {
 
 // Change password
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<User> => {
-  const res = await api.put<User>("/auth/me/password", {
+  const res = await api.put<User>("/auth/me/change-password", {
     currentPassword,
-    password: newPassword,
+    newPassword,
   });
+  console.log("DAATA" ,res)
   return res.data;
+
 };
 
 // Change email
 export const changeEmail = async (currentPassword: string, newEmail: string): Promise<User> => {
-  const res = await api.put<User>("/auth/me/email", {
+  const res = await api.put<User>("/auth/me/change-email", {
     currentPassword,
     email: newEmail,
   });

@@ -36,6 +36,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const { token } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { logout } = useAuth();
+
 
   /**
    * Fetch user profile whenever token changes
@@ -77,8 +79,30 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
    * Sends partial updates and replaces local state with response
    */
   const updateUserProfile = async (data: Partial<User>) => {
+  if (!user) return;
+
+  const prevUser = user;
+
+  //  Create NEW object (avoid mutation leaks)
+  const optimisticUser = {
+    ...user,
+    ...data,
+    _id: user._id, // ensure ID is preserved
+  };
+
+  setUser(optimisticUser);
+
+  try {
     const updated = await updateProfile(data);
-    setUser(updated);
+
+    // Ensure update only applies if same user
+    if (updated._id === user._id) {
+      setUser(updated);
+    }
+  } catch (err) {
+    setUser(prevUser); // rollback
+    throw err;
+  }
   };
 
   /**
@@ -86,7 +110,8 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
    * Only triggers backend operation, does not modify local user state
    */
   const changeUserPassword = async (current: string, next: string) => {
-    await changePassword(current, next);
+     await changePassword(current, next);
+  
   };
 
   /**

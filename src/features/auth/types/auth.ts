@@ -7,6 +7,7 @@ export interface User {
   email: string;
   phoneNumber: string;
   profilePicture?: string;
+  password?:string;
 }
 export interface ProfileResponse {
   message: string;

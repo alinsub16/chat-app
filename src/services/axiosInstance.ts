@@ -41,7 +41,7 @@ api.interceptors.response.use(
         return api(originalRequest); // retry the request
       } catch (refreshError) {
         localStorage.removeItem("token");
-        window.location.href = "/login"; // force logout
+        window.location.href = "/"; // force logout
       }
     }
 

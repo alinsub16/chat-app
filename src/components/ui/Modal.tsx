@@ -2,10 +2,10 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ModalProps {
-  show: boolean;
-  title: string;
+  show?: boolean;
+  title?: string;
   message: string;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const Modal: React.FC<ModalProps> = ({ show, title, message, onClose }) => {
