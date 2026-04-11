@@ -2,142 +2,206 @@ import React, { useState } from "react";
 import { Button } from "@components/ui/Button";
 import { Input } from "@components/ui/Input";
 import { LoginData, RegisterData } from "@features/auth/types/auth";
+import { loginSchema,registerSchema,} from "@features/auth/validation/auth.schema";
 
-type AuthFormProps<T extends "login" | "register"> = {
+/* =======================
+   TYPES
+======================= */
+type Mode = "login" | "register";
+
+type AuthFormProps<T extends Mode> = {
   mode: T;
-  onSubmit: (data: T extends "login" ? LoginData : RegisterData) => void | Promise<void>;
+  onSubmit: (
+    data: T extends "login" ? LoginData : RegisterData
+  ) => void | Promise<void>;
   isSubmitting?: boolean;
-  
 };
-const AuthForm= <T extends "login" | "register"> ({ mode, onSubmit, isSubmitting, }: AuthFormProps<T>) => {
+
+/* =======================
+   COMPONENT
+======================= */
+const AuthForm = <T extends Mode>({ mode, onSubmit, isSubmitting, }: AuthFormProps<T>) => {
+  const isLogin = mode === "login";
+
+  /* =======================
+     STATE
+  ======================= */
   const [formData, setFormData] = useState<LoginData | RegisterData>(
-    mode === "login"
+    isLogin
       ? { email: "", password: "" }
       : {
           firstName: "",
-          lastName: "",
           middleName: "",
+          lastName: "",
           email: "",
           phoneNumber: "",
           password: "",
-          profilePicture: null,
+          profilePicture: undefined,
         }
   );
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  /* =======================
+     HANDLE CHANGE
+  ======================= */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: name === "profilePicture" && files ? files[0] : value, }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "profilePicture" && files ? files[0] : value,
+    }));
+
+    //  Clear error on change
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /* =======================
+     VALIDATE + SUBMIT
+  ======================= */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData as any);
+
+    const schema = isLogin ? loginSchema : registerSchema;
+
+    const result = schema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+
+      result.error.issues.forEach((err) => {
+        const field = err.path[0];
+        if (field) {
+          fieldErrors[field.toString()] = err.message;
+        }
+      });
+
+      setErrors(fieldErrors);
+      return;
+    }
+
+    try {
+      setErrors({});
+      await onSubmit(result.data as any);
+    } catch (err: any) {
+      //  Backend error handling
+      const message =
+        err?.response?.data?.errors?.[0] ||
+        err?.response?.data?.message ||
+        "Something went wrong";
+
+      setErrors({ email: message }); // example mapping
+    }
   };
 
+  /* =======================
+     RENDER
+  ======================= */
   return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* LOGIN */}
+      {isLogin && (
+        <>
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            placeholder="name@example.com"
+            value={(formData as LoginData).email}
+            onChange={handleChange}
+            error={errors.email}
+          />
 
-    <>
-      <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === "login" && (
-              <>
-              <Input
-                label="Email"
-                name="email"
-                type="email"
-                placeholder="name@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Password"
-                name="password"
-                type="password"
-                placeholder="Your password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </>
-          )}
-          
+          <Input
+            label="Password"
+            name="password"
+            type="password"
+            placeholder="Your password"
+            value={(formData as LoginData).password}
+            onChange={handleChange}
+            error={errors.password}
+          />
+        </>
+      )}
 
-          {/* Register-specific fields */}
-          {mode === "register" && (
-            <>
-              
-              <Input
-                label="First Name"
-                name="firstName"
-                type="text"
-                placeholder="Enter your first name"
-                value={(formData as RegisterData).firstName}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Midle Name"
-                name="middleName"
-                type="text"
-                placeholder="Enter your middle name"
-                value={(formData as RegisterData).middleName}
-                onChange={handleChange}
-              />
-              <Input
-                label="Last Name"
-                name="lastName"
-                type="text"
-                placeholder="Enter your last name"
-                value={(formData as RegisterData).lastName}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Phone Number"
-                name="phoneNumber"
-                type="tel"
-                placeholder="Enter your phone number"
-                value={(formData as RegisterData).phoneNumber}
-                onChange={handleChange}
-              />
-              
-              <Input
-                label="Email"
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Upload Picture"
-                name="profilePicture"
-                type="file"
-                accept="image/*"
-                onChange={handleChange}
-                variant="small"
-              />
-            </>
+      {/* REGISTER */}
+      {!isLogin && (
+        <>
+          <Input
+            label="First Name"
+            name="firstName"
+            value={(formData as RegisterData).firstName}
+            onChange={handleChange}
+            error={errors.firstName}
+          />
 
-          )}
-          <div className="flex justify-end gap-10 ">
-            
-            <Button type="submit" isLoading={isSubmitting} className="w-25" >
-              {mode === "login" ? "Login" : "Register"}
-            </Button>
-          </div>
-        </form>
-      </>
+          <Input
+            label="Middle Name"
+            name="middleName"
+            value={(formData as RegisterData).middleName}
+            onChange={handleChange}
+            error={errors.middleName}
+          />
+
+          <Input
+            label="Last Name"
+            name="lastName"
+            value={(formData as RegisterData).lastName}
+            onChange={handleChange}
+            error={errors.lastName}
+          />
+
+          <Input
+            label="Phone Number"
+            name="phoneNumber"
+            value={(formData as RegisterData).phoneNumber}
+            onChange={handleChange}
+            error={errors.phoneNumber}
+          />
+
+          <Input
+            label="Email"
+            name="email"
+            type="email"
+            value={(formData as RegisterData).email}
+            onChange={handleChange}
+            error={errors.email}
+          />
+
+          <Input
+            label="Password"
+            name="password"
+            type="password"
+            value={(formData as RegisterData).password}
+            onChange={handleChange}
+            error={errors.password}
+          />
+
+          <Input
+            label="Upload Picture"
+            name="profilePicture"
+            type="file"
+            accept="image/*"
+            onChange={handleChange}
+            error={errors.profilePicture}
+          />
+        </>
+      )}
+
+      {/* SUBMIT */}
+      <div className="flex justify-end">
+        <Button
+          type="submit"
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
+          className="w-28"
+        >
+          {isLogin ? "Login" : "Register"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

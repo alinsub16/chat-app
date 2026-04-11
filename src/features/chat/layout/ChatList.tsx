@@ -1,23 +1,34 @@
-import React from "react";
+import { useState, useRef } from "react";
 import ChatListItem from "@/features/chat/components/ChatListItem";
 import { useConversation } from "@/features/chat/hooks/useConversation";
 import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import { useMessages } from "@features/chat/hooks/useMessage";
-import { Atom } from "react-loading-indicators";
 import ConversationListSkeleton from "@/features/chat/components/ConversationListSkeleton";
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
 const ChatList = () => {
   const { conversations, loading, removeConversation } = useConversation();
   const { fetchMessages } = useMessages();
   const { user} = useProfile(); 
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // When clicking outside it will outomatically close the toggleMenu
+  useOnClickOutside(containerRef, () => { setOpenMenuId(null); });
+
+  const handleMenuToggle = (chatId: string, open: boolean) => {
+    setOpenMenuId(open ? chatId : null);
+  };
+  const handleViewProfile = (id: string) => {
+  console.log("view profile:", id);
+};
 
  const handleDeleteConversation = (id: string) => {
   removeConversation(id);
 };
 
-  if (loading) {
-    return <ConversationListSkeleton />
-  }
+  if (loading) { return <ConversationListSkeleton /> }
 
   if (!conversations || conversations.length === 0) {
     return (
@@ -27,8 +38,10 @@ const ChatList = () => {
     );
   }
 
+  
+
   return (
-    <div className="w-full max-w-[330px] bg-black text-white overflow-y-auto p-2">
+    <div ref={containerRef} className="w-full max-w-[330px] bg-black text-white overflow-y-auto p-2">
     
     {conversations.map((conv) => {   
     const participants = conv.participants || [];
@@ -40,18 +53,21 @@ const ChatList = () => {
     const firstCharName = otherUser ? `${otherUser.firstName?.charAt(0) || ""}${otherUser.lastName?.charAt(0) || ""}`.toUpperCase() : "?";
     // Profile Picture
     const profilePicture = otherUser?.profilePicture || null;
+
       return (
         <ChatListItem
           key={conv._id}
-          avatar={profilePicture || "/default-avatar.png"}
+          avatar={profilePicture}
           initialName={firstCharName}
           alt={fullName}
           name={conv.chatName || fullName || "null"}
           message={conv.latestMessage?.content ?? "No messages yet"}
           time={conv.latestMessage ? new Date(conv.latestMessage.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "" }
-          onClick={()=> { fetchMessages(conv._id) }}
+          isOpen={openMenuId === conv._id}
+          onMenuToggle={(open) => handleMenuToggle(conv._id, open)}
+          onClick={() => { setOpenMenuId(null); fetchMessages(conv._id); }}
           onDeleteClick={() => handleDeleteConversation(conv._id)} 
-
+          onViewProfile={() => handleViewProfile(conv._id)} 
         />
       );
     })}

@@ -1,4 +1,7 @@
 import React, { useState, useCallback, useMemo } from "react";
+import { useProfile } from "@/features/userProfile/hooks/useProfile";
+import Avatar from "@/components/ui/Avatar";
+import { useConversation } from "@/features/chat/hooks/useConversation";
 
 export type ProfileTab = {
   label: string;
@@ -34,6 +37,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     defaultTab ?? resolvedTabs[0]?.value
   );
 
+  const { user } = useProfile();
+  const { conversations } = useConversation();
+
   const isControlled = controlledActiveTab !== undefined;
   const activeTab = isControlled ? controlledActiveTab : internalTab;
 
@@ -47,16 +53,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     [isControlled, onTabChange]
   );
 
+  const currentConversation = conversations[0];
+
+  const otherUser = currentConversation?.participants.find((p) => String(p._id) !== String(user?._id));
+  const displayName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : "Unknown User";
+  const avatar = otherUser?.profilePicture || null;
+
   return (
     <div className="flex items-center gap-6 bg-neutral-800 px-6 py-3 text-white">
       {/* Profile */}
       <div className="flex items-center gap-3 min-w-0">
-        <img
-          src={avatarUrl}
-          alt={name}
-          className="h-10 w-10 rounded-full object-cover"
-          loading="lazy"
-        />
+        <Avatar avatar={avatar} name={displayName} className="w-10 h-10"/>
+
         <span className="text-base font-semibold truncate">{name}</span>
       </div>
 

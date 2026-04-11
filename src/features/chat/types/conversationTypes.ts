@@ -21,15 +21,16 @@ export interface CreateConversationData {
 }
 
 export interface ChatListItemProps {
-  avatar: string;
+  avatar: string | null;
   alt?: string | null;
   initialName?: string | null;
   name: string;
   message: any;
   time: string;
   unread?: boolean | string;
-
+  isOpen: boolean;
   onClick?: () => void;
   onDeleteClick?: () => void;
+  onViewProfile?: () => void;
   onMenuToggle?: (open: boolean) => void;
 }

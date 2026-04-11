@@ -2,8 +2,21 @@ import api from "@services/axiosInstance";
 import { User, RegisterData, LoginData, AuthResponse,ProfileResponse } from "@/features/auth/types/auth";
 
 // Register
-export const registerUser = async (data: RegisterData): Promise<AuthResponse> => {
-  const res = await api.post<AuthResponse>("/auth/register", data);
+export const registerUser = async ( data: RegisterData ): Promise<AuthResponse> => {
+  const formData = new FormData();
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, value as any);
+    }
+  });
+
+  const res = await api.post<AuthResponse>("/auth/register", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return res.data;
 };
 

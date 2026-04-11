@@ -4,42 +4,53 @@ import { Input } from "@/components/ui/Input";
 import { Atom } from "react-loading-indicators";
 import { useConversation } from "@/features/chat/hooks/useConversation";
 import { useProfile } from "@/features/userProfile/hooks/useProfile";
+import { useMessages } from "@features/chat/hooks/useMessage";
+import Avatar from "@/components/ui/Avatar";
 
 const UserSearch = () => {
   const [query, setQuery] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
   const { users, loading, error, searchUsers } = useSearchUsers(300);
   const { conversations, createNewConversation, setActiveConversation } = useConversation();
   const { user } = useProfile();
+  const { fetchMessages } = useMessages();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    searchUsers(value);
+
+    if (value.trim() === "") {
+      setHasSearched(false); // reset if input cleared
+    } else {
+      searchUsers(value);
+      setHasSearched(true); // mark that a search has been performed
+    }
   };
 
   const handleUserClick = async (userId: string) => {
     if (userId === user?._id) return;
 
     try {
-      // Check if conversation already exists
       const existing = conversations.find(
         (conv) => conv.participants?.some((member) => member._id === userId)
       );
 
       if (existing) {
-        setActiveConversation(existing); // just set active
+        fetchMessages(existing._id);
+        setActiveConversation(existing);
       } else {
         const newConv = await createNewConversation({ receiverId: userId });
-        setActiveConversation(newConv); // set newly created
+        setActiveConversation(newConv);
       }
 
-      setQuery(""); // Clear search input
+      setQuery("");
+      setHasSearched(false); // reset after click
     } catch (err) {
       console.error(err);
     }
   };
 
-  const showNoUsers = query.trim() !== "" && !loading && users.length === 0;
+  const showNoUsers = hasSearched && !loading && users.length === 0;
 
   return (
     <div className="max-w-md mx-auto relative">
@@ -65,14 +76,14 @@ const UserSearch = () => {
             {users.length > 0 ? (
               users.map((u) => {
                 const isCurrentUser = u._id === user?._id;
+                const fullName = `${u.firstName}, ${u.lastName}`
                 return (
                   <li
                     key={u._id}
-                    className={`p-2 border-b cursor-pointer hover:bg-gray-800 ${
-                      isCurrentUser ? "cursor-not-allowed opacity-50" : ""
-                    }`}
+                    className={`flex items-center gap-2 p-2 border-b cursor-pointer hover:bg-gray-800 ${ isCurrentUser ? "cursor-not-allowed opacity-50" : "" }`}
                     onClick={() => handleUserClick(u._id)}
                   >
+                    <Avatar avatar={u.profilePicture || null} name={fullName} className="w-10 h-10"/>
                     {u.firstName} {u.lastName} {isCurrentUser && "(Me)"}
                   </li>
                 );

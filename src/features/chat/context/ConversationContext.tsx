@@ -95,14 +95,26 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [user, socket, joinChat]);
 
   const createNewConversation = async (data: CreateConversationData) => {
-    const newConv = await createConversation(data);
-    setConversations(prev => [newConv, ...prev]);
-    if (socket?.connected) {
-      socket.emit("conversation:create", newConv);
-      joinChat(newConv._id);
-    }
-    return newConv; // 🔥 Return the conversation so caller can use it
-  };
+      try {
+        const newConv = await createConversation(data);
+
+        setConversations(prev => {
+          const exists = prev.some(c => c._id === newConv._id);
+          if (exists) return prev;
+          return [newConv, ...prev];
+        });
+
+        if (socket?.connected) {
+          socket.emit("conversation:create", newConv);
+          joinChat(newConv._id);
+        }
+
+        return newConv;
+      } catch (err) {
+        console.error("Failed to create conversation:", err);
+        throw err; // important so UI can react
+      }
+    };
 
   const removeConversation = async (id: string) => {
     await deleteConversation(id);

@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { MoreVertical, User, Settings, LogOut } from "lucide-react";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import ProfileDrawer from "@/features/userProfile/components/ProfileDrawer";
+import Avatar from "@/components/ui/Avatar";
 
 const UserProfileMenu = () => {
   const { user } = useProfile();
@@ -28,6 +29,9 @@ const UserProfileMenu = () => {
     setOpen((prev) => !prev);
   };
 
+  const fullName = `${user?.firstName} ${user?.lastName}`;
+
+
   // Use ONLY ONCE
   useOnClickOutside(ref, handleClose);
 
@@ -38,12 +42,7 @@ const UserProfileMenu = () => {
         className="flex items-center gap-2 cursor-pointer"
         onClick={handleToggle}
       >
-        <img
-          src={user?.profilePicture || "/default-avatar.png"}
-          alt={user?.firstName}
-          className="w-8 h-8 rounded-full object-cover"
-        />
-
+        <Avatar avatar={user?.profilePicture || null} name={fullName} className="w-8 h-8"/>
         <MoreVertical size={16} />
       </div>
 
