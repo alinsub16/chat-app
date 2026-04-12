@@ -3,6 +3,7 @@ import { Button } from "@components/ui/Button";
 import { Input } from "@components/ui/Input";
 import { LoginData, RegisterData } from "@features/auth/types/auth";
 import { loginSchema,registerSchema,} from "@features/auth/validation/auth.schema";
+import { Eye, EyeOff } from "lucide-react";
 
 /* =======================
    TYPES
@@ -41,6 +42,7 @@ const AuthForm = <T extends Mode>({ mode, onSubmit, isSubmitting, }: AuthFormPro
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   /* =======================
      HANDLE CHANGE
@@ -113,17 +115,26 @@ const AuthForm = <T extends Mode>({ mode, onSubmit, isSubmitting, }: AuthFormPro
             onChange={handleChange}
             error={errors.email}
           />
-
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            placeholder="Your password"
-            value={(formData as LoginData).password}
-            onChange={handleChange}
-            error={errors.password}
-          />
-        </>
+          <div className="relative">
+            <Input
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Your password"
+              value={(formData as LoginData).password}
+              onChange={handleChange}
+              error={errors.password}
+            />
+            {/* Eye Icon */}
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-11 text-gray-400 cursor-pointer"
+              >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          </>
       )}
 
       {/* REGISTER */}
@@ -169,16 +180,24 @@ const AuthForm = <T extends Mode>({ mode, onSubmit, isSubmitting, }: AuthFormPro
             onChange={handleChange}
             error={errors.email}
           />
-
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            value={(formData as RegisterData).password}
-            onChange={handleChange}
-            error={errors.password}
-          />
-
+          <div className="relative">
+            <Input
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={(formData as RegisterData).password}
+              onChange={handleChange}
+              error={errors.password}
+            />
+            {/* Eye Icon */}
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-11 text-gray-400 cursor-pointer"
+              >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           <Input
             label="Upload Picture"
             name="profilePicture"

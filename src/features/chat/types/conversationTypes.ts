@@ -29,6 +29,7 @@ export interface ChatListItemProps {
   time: string;
   unread?: boolean | string;
   isOpen: boolean;
+  isActive?: boolean,
   onClick?: () => void;
   onDeleteClick?: () => void;
   onViewProfile?: () => void;

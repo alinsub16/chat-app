@@ -2,8 +2,20 @@ import { MoreVertical, Eye, Trash2 } from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import { ChatListItemProps } from "@features/chat/types/conversationTypes";
 
-
-const ChatListItem: React.FC<ChatListItemProps> = ({  avatar, alt, name, message, time, unread = false, isOpen, onClick, onDeleteClick, onViewProfile, onMenuToggle, }) => {
+const ChatListItem: React.FC<ChatListItemProps> = ({
+  avatar,
+  alt,
+  name,
+  message,
+  time,
+  unread = false,
+  isOpen,
+  isActive,
+  onClick,
+  onDeleteClick,
+  onViewProfile,
+  onMenuToggle,
+}) => {
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMenuToggle?.(!isOpen);
@@ -24,15 +36,32 @@ const ChatListItem: React.FC<ChatListItemProps> = ({  avatar, alt, name, message
   return (
     <div
       onClick={onClick}
-      className="flex items-center justify-between px-3 py-2 hover:bg-gray-800 transition cursor-pointer rounded-lg relative"
+      className={`flex items-center justify-between px-3 py-2 transition cursor-pointer rounded-lg relative
+        ${
+          isActive
+            ? "bg-gray-800 text-white border-l-2 border-r-2 border-purple-500"
+            : "hover:bg-gray-800 text-gray-300"
+        }
+      `}
     >
       {/* LEFT */}
       <div className="flex items-center gap-3">
         <Avatar avatar={avatar || null} name={name} className="w-10 h-10" />
 
         <div className="flex flex-col">
-          <span className="text-white font-medium">{name}</span>
-          <span className="text-gray-400 text-sm truncate max-w-[160px]">
+          <span
+            className={`font-medium ${
+              isActive ? "text-white" : "text-gray-200"
+            }`}
+          >
+            {name}
+          </span>
+
+          <span
+            className={`text-sm truncate max-w-[160px] ${
+              isActive ? "text-gray-300" : "text-gray-400"
+            }`}
+          >
             {message}
           </span>
         </div>
@@ -40,7 +69,13 @@ const ChatListItem: React.FC<ChatListItemProps> = ({  avatar, alt, name, message
 
       {/* RIGHT */}
       <div className="flex flex-col items-end gap-1 relative">
-        <span className="text-gray-400 text-xs">{time}</span>
+        <span
+          className={`text-xs ${
+            isActive ? "text-gray-300" : "text-gray-400"
+          }`}
+        >
+          {time}
+        </span>
 
         {unread && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
 

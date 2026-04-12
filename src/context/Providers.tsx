@@ -4,6 +4,7 @@ import { ConversationProvider } from "@/features/chat/context/ConversationContex
 import { MessageProvider} from "@/features/chat/context/MessageContext"
 import { SocketProvider } from "@/features/chat/context/SocketContext"
 import { ProfileProvider } from "@/features/userProfile/context/profileContext"
+import { ProfileViewProvider } from "@/features/userProfile/context/userProfileViewContext"
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -13,13 +14,15 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
     <AuthProvider>
       <ProfileProvider>
-        <SocketProvider>
-          <ConversationProvider>
+        <ProfileViewProvider>
+          <SocketProvider>
+           <ConversationProvider>
               <MessageProvider>
                 {children}
               </MessageProvider>
-          </ConversationProvider>
-        </SocketProvider>
+           </ConversationProvider>
+          </SocketProvider>
+        </ProfileViewProvider>
       </ProfileProvider>
     </AuthProvider>
   );

@@ -2,6 +2,11 @@
 import api from "@services/axiosInstance";
 import { User,ProfileResponse } from "@/features/auth/types/auth";
 
+// Get other user profile (or any user by ID)
+export const getUserProfileById = async (userId: string): Promise<User> => {
+  const res = await api.get<User>(`/users/${userId}`);
+  return res.data;
+};
 
 // Get logged-in user
 export const getProfile = async (): Promise<ProfileResponse> => {

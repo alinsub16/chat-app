@@ -3,6 +3,7 @@ import ChatListItem from "@/features/chat/components/ChatListItem";
 import { useConversation } from "@/features/chat/hooks/useConversation";
 import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import { useMessages } from "@features/chat/hooks/useMessage";
+import { useProfileView } from "@/features/userProfile/hooks/useProfileView";
 import ConversationListSkeleton from "@/features/chat/components/ConversationListSkeleton";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
@@ -10,7 +11,9 @@ const ChatList = () => {
   const { conversations, loading, removeConversation } = useConversation();
   const { fetchMessages } = useMessages();
   const { user} = useProfile(); 
+  const { getUserProfile } = useProfileView();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -20,13 +23,15 @@ const ChatList = () => {
   const handleMenuToggle = (chatId: string, open: boolean) => {
     setOpenMenuId(open ? chatId : null);
   };
-  const handleViewProfile = (id: string) => {
-  console.log("view profile:", id);
-};
 
- const handleDeleteConversation = (id: string) => {
+  const handleViewProfile = async (userId: string) => {
+    await getUserProfile(userId);
+    
+  };
+
+  const handleDeleteConversation = (id: string) => {
   removeConversation(id);
-};
+  };
 
   if (loading) { return <ConversationListSkeleton /> }
 
@@ -65,12 +70,21 @@ const ChatList = () => {
           time={conv.latestMessage ? new Date(conv.latestMessage.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "" }
           isOpen={openMenuId === conv._id}
           onMenuToggle={(open) => handleMenuToggle(conv._id, open)}
-          onClick={() => { setOpenMenuId(null); fetchMessages(conv._id); }}
+          isActive={activeConversationId === conv._id}
+          onClick={() => { 
+            setOpenMenuId(null);
+            setActiveConversationId(conv._id);
+            fetchMessages(conv._id);
+          }}
           onDeleteClick={() => handleDeleteConversation(conv._id)} 
-          onViewProfile={() => handleViewProfile(conv._id)} 
+          onViewProfile={() => { 
+            if (!otherUser?._id) 
+            return; handleViewProfile(otherUser._id);
+           }} 
         />
       );
     })}
+    
     </div>
   );
 };

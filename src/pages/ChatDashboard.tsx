@@ -3,6 +3,7 @@ import Sidebar from '@/components/layout/Sidebar'
 import ChatList from '@/features/chat/layout/ChatList'
 import ChatBoard from '@features/chat/layout/ChatBoard'
 import Header from '@/components/layout/Header'
+import ViewUserProfileModal from '@/features/userProfile/components/ViewUserProfileModal'
 
 const ChatDashboard = () => {
   return (
@@ -21,6 +22,8 @@ const ChatDashboard = () => {
           <ChatBoard />
         </main>
       </div>
+      {/* GLOBAL MODAL (IMPORTANT) */}
+      <ViewUserProfileModal />
     </div>
   );
 };
