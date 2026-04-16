@@ -13,6 +13,7 @@ interface SocketContextType {
   deleteMessageSocket: (data: any) => void;
   updateMessageSocket: (data: any) => void;
   sendSocketMessage: (data: any) => void;
+  disconnect: () => void;
   reactMessageSocket: (data: { messageId: string; emoji: string }) => void;
   onReactionUpdate?: (data: any) => void,
   emitTyping: (conversationId: string, isTyping: boolean) => void;
@@ -55,6 +56,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
       return;
     }
+
 
     if (!socket) {
       console.log('🔌 Connecting to socket server:', SOCKET_URL);
@@ -188,6 +190,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   },
   [socket]
 );
+const disconnect = useCallback(() => {
+  if (socket) {
+    console.log("🔌 Manually disconnecting socket");
+    socket.disconnect();
+    setSocket(null);
+    setIsConnected(false);
+    setOnlineUsers([]);
+  }
+}, [socket]);
 
   const emitTyping = useCallback((conversationId: string, isTyping: boolean) => {
     if (socket && isConnected) 
@@ -210,6 +221,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     reactMessageSocket,  
     emitTyping,
     setupMessageHandlers,
+    disconnect,
   };
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

@@ -29,11 +29,11 @@ const ViewUserProfileModal = () => {
   const fullName = `${selectedUser.firstName || ""} ${
     selectedUser.middleName || ""
   } ${selectedUser.lastName || ""}`;
+
   const name = `${selectedUser.firstName || ""} ${selectedUser.lastName || ""}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-
       {/* 🌫 Blur Background */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-md"
@@ -62,7 +62,12 @@ const ViewUserProfileModal = () => {
 
           {/* Avatar + Name */}
           <div className="flex flex-col items-center text-center">
-            <Avatar avatar={selectedUser.profilePicture || null} name={name} size={100} className="w-24 h-24 shadow-md" />
+            <Avatar
+              avatar={selectedUser.profilePicture || null}
+              name={name}
+              size={100}
+              className="w-24 h-24 shadow-md"
+            />
 
             <h2 className="mt-3 text-xl font-semibold text-white">
               {name}
@@ -100,6 +105,17 @@ const ViewUserProfileModal = () => {
               <div>
                 <p className="text-xs text-gray-400">Full Name</p>
                 <p className="text-sm text-white">{fullName}</p>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div className="flex items-start gap-3">
+              <User size={18} className="text-gray-400 mt-1" />
+              <div>
+                <p className="text-xs text-gray-400">Bio</p>
+                <p className="text-sm text-white leading-relaxed">
+                  {selectedUser.bio || "N/A"}
+                </p>
               </div>
             </div>
 

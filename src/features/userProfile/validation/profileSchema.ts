@@ -31,13 +31,16 @@ export const profileSchema = z
       .regex(phoneRegex, "Phone number must be 10–11 digits")
       .optional()
       .or(z.literal("")),
+    bio: z.string().max(160, "Bio must not exceed 160 characters").optional(),  
   })
   .refine(
     (data) =>
       data.firstName ||
       data.middleName ||
       data.lastName ||
-      data.phoneNumber,
+      data.phoneNumber ||
+      data.bio,
+      
     {
       message: "At least one field must be updated",
     }

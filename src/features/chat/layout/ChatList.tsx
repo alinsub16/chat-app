@@ -6,14 +6,18 @@ import { useMessages } from "@features/chat/hooks/useMessage";
 import { useProfileView } from "@/features/userProfile/hooks/useProfileView";
 import ConversationListSkeleton from "@/features/chat/components/ConversationListSkeleton";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
+import { useSocket } from '@features/chat/hooks/useSocket';
 
 const ChatList = () => {
   const { conversations, loading, removeConversation } = useConversation();
   const { fetchMessages } = useMessages();
   const { user} = useProfile(); 
   const { getUserProfile } = useProfileView();
+  const { onlineUsers } = useSocket();
+
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -59,6 +63,9 @@ const ChatList = () => {
     // Profile Picture
     const profilePicture = otherUser?.profilePicture || null;
 
+    //ONLINE CHECK (this is the key part)
+    const isOnline = onlineUsers?.some( (id: string) => String(id) === String(otherUser?._id) );
+
       return (
         <ChatListItem
           key={conv._id}
@@ -76,6 +83,7 @@ const ChatList = () => {
             setActiveConversationId(conv._id);
             fetchMessages(conv._id);
           }}
+          isOnline={isOnline}
           onDeleteClick={() => handleDeleteConversation(conv._id)} 
           onViewProfile={() => { 
             if (!otherUser?._id) 

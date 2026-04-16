@@ -11,4 +11,5 @@ export interface UserProfile {
   profilePicture?: string;
   email?: string;
   phoneNumber?: string;
+  bio?: string;
 }; 

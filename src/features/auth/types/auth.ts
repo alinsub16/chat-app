@@ -8,6 +8,7 @@ export interface User {
   phoneNumber: string;
   profilePicture?: string;
   password?:string;
+  bio?: string;
 }
 export interface ProfileResponse {
   message: string;
