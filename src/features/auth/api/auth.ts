@@ -1,5 +1,5 @@
 import api from "@services/axiosInstance";
-import { User, RegisterData, LoginData, AuthResponse,ProfileResponse } from "@/features/auth/types/auth";
+import {  RegisterData, LoginData, AuthResponse,} from "@/features/auth/types/auth";
 
 // Register
 export const registerUser = async ( data: RegisterData ): Promise<AuthResponse> => {

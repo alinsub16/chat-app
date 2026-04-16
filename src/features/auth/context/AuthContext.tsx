@@ -2,6 +2,7 @@ import React, { createContext, useState, ReactNode } from "react";
 import { AuthResponse, LoginData, RegisterData } from "@/features/auth/types/auth";
 import { loginUser, registerUser } from "@/features/auth/api/auth";
 
+
 /**
  * Defines the shape of the Auth Context
  * This ensures type safety across the app when consuming auth data
@@ -97,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setToken(null);
     localStorage.removeItem("token");
+
   };
 
   /**

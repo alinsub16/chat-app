@@ -299,7 +299,7 @@ const EditProfileModal: React.FC<Props> = ({ onClose }) => {
           </div>
         </div>
 
-        {/* 🔻 Sticky Footer */}
+        {/* Sticky Footer */}
         <div className="border-t border-gray-800 p-4">
           <Button
             onClick={onClose}

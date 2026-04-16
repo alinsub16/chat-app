@@ -4,6 +4,7 @@ import { useSocket } from '@features/chat/hooks/useSocket';
 
 const DebugSocket: React.FC = () => {
   const { socket, isConnected, onlineUsers } = useSocket();
+  console.log('DebugSocket Rendered', {  onlineUsers });
 
   return (
     <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg text-xs z-50">

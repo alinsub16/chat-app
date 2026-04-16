@@ -1,14 +1,18 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useSocket } from '@features/chat/hooks/useSocket';
 import { MoreVertical, User, Settings, LogOut } from "lucide-react";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import ProfileDrawer from "@/features/userProfile/components/ProfileDrawer";
 import Avatar from "@/components/ui/Avatar";
+import { fa } from "zod/v4/locales";
+
 
 const UserProfileMenu = () => {
   const { user } = useProfile();
   const { logout } = useAuth();
+  const { disconnect } = useSocket();
 
   const [open, setOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -67,7 +71,10 @@ const UserProfileMenu = () => {
           </button>
 
           <button
-            onClick={logout}
+            onClick={() => {
+              logout();
+             disconnect();
+            }}
             className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-800 rounded-md text-red-500"
           >
             <LogOut size={16} />

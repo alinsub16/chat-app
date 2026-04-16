@@ -11,6 +11,7 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
   unread = false,
   isOpen,
   isActive,
+  isOnline,
   onClick,
   onDeleteClick,
   onViewProfile,
@@ -46,7 +47,18 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
     >
       {/* LEFT */}
       <div className="flex items-center gap-3">
-        <Avatar avatar={avatar || null} name={name} className="w-10 h-10" />
+        
+        {/* ✅ Avatar + Status */}
+        <div className="relative">
+          <Avatar avatar={avatar || null} name={name} className="w-10 h-10" />
+
+          {/* ONLINE INDICATOR */}
+          <span
+            className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-1 border-gray-900
+              ${isOnline ? "bg-green-500" : "bg-red-500"}
+            `}
+          />
+        </div>
 
         <div className="flex flex-col">
           <span
