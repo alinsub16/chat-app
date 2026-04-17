@@ -40,7 +40,7 @@ const ChatListItem: React.FC<ChatListItemProps> = ({
       className={`flex items-center justify-between px-3 py-2 transition cursor-pointer rounded-lg relative
         ${
           isActive
-            ? "bg-gray-800 text-white border-l-2 border-r-2 border-purple-500"
+            ? "bg-gray-800 text-white border-l-2 border-r-2 border-[#1553ea]"
             : "hover:bg-gray-800 text-gray-300"
         }
       `}

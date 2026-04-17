@@ -94,8 +94,9 @@ const AuthForm = <T extends Mode>({ mode, onSubmit, isSubmitting, }: AuthFormPro
         err?.response?.data?.message ||
         "Something went wrong";
 
-      setErrors({ email: message }); // example mapping
+      setErrors({ email: message }); 
     }
+    
   };
 
   /* =======================

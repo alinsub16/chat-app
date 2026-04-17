@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setError(message);
 
-      throw new Error(message);
+      throw err;
 
     } finally {
       setAuthLoading(false);

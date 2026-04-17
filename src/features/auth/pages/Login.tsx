@@ -8,7 +8,7 @@ import AuthForm from "@features/auth/components/AuthForm";
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [modal, setModal] = useState({ show: false, title: "", message: "" });
+  const [modal, setModal] = useState({ show: false, title: "", message: "",showButton: true, });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async (data: LoginData) => {
@@ -19,6 +19,7 @@ const Login = () => {
           show: true,
           title: "Login Successful",
           message: "Redirecting to dashboard...",
+          showButton: false
         });
         setTimeout(() => {
           setModal((m) => ({ ...m, show: false }));
@@ -29,6 +30,7 @@ const Login = () => {
         show: true,
         title: "Error",
         message: err.message || "Something went wrong.",
+        showButton: true,
       });
     } finally {
       setIsSubmitting(false);
@@ -44,8 +46,10 @@ const Login = () => {
         title={modal.title}
         message={modal.message}
         onClose={() => setModal((m) => ({ ...m, show: false }))}
+        showButton={modal.showButton}
       />
     </div>
+
   );
 };
 

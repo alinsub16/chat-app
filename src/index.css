@@ -5,34 +5,34 @@
 @import "tailwindcss";
 
 /* =====================
-   🧭 THEME CONFIGURATION
+    THEME CONFIGURATION
    ===================== */
 @theme {
-  /* 🎨 COLORS */
+  /* COLORS */
   --color-primary: #041643;
   --color-primary-light: #0A2471;
   --color-primary-dark: #020B29;
-  --color-light: #3f3f3f; /* ← FIXED */
+  --color-light: #3f3f3f; /* 
 
-  /* 🌈 Default Tailwind overrides */
+  /* Default Tailwind overrides */
   --color-red-500: #ef4444;
   --color-green-500: #22c55e;
   --color-gray-100: #f3f4f6;
   --color-gray-900: #111827;
 
-  /* 📱 BREAKPOINTS */
+  /* BREAKPOINTS */
   --breakpoint-sm: 480px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
 
-  /* 🖋️ FONT */
+  /*  FONT */
   --font-sans: "Inter", sans-serif;
 }
 
 /* =====================
-   🧩 BASE STYLES
+    BASE STYLES
    ===================== */
 :root {
   font-family: var(--font-sans);
@@ -49,7 +49,7 @@
 }
 
 /* =====================
-   🎯 SCROLLBAR UTILITY
+   SCROLLBAR UTILITY
    ===================== */
 @layer utilities {
   .chat-scroll {

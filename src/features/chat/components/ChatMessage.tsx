@@ -119,7 +119,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         <div
           className={`relative py-3 px-2 rounded-lg w-full ${
             sender === "user"
-              ? "bg-purple-600 text-white"
+              ? "bg-[#1553ea] text-white"
               : "bg-gray-800 text-gray-200"
           }`}
           onMouseDown={handlePressStart}
