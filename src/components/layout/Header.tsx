@@ -10,7 +10,7 @@ const Header = () => {
     <header className='p-3 flex justify-between items-center'>
         <div>
             <p>Chat</p>
-            <DebugSocket />
+            {/* <DebugSocket /> */}
         </div>
         <div>
             <UserSearch />

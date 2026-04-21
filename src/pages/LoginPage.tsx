@@ -29,9 +29,10 @@ const LoginPage = () => {
   : "mt-[250px]";
   
   return (
-    <div className='bg-primary min-h-screen py-5 before' style={{ "--icon-url": `url(${bgStyle})` } as React.CSSProperties}>
+    <div className="bg-primary min-h-screen py-5 relative">
+      <img src={bgStyle} alt="bg-style" className="absolute top-0 left-0 w-1/2 h-full z-0" />
       <div className='wrapper'>
-        <div className='flex flex-start justify-evenly' >
+        <div className='flex flex-start justify-evenly z-1 relative' >
           <div className="w-1/2">
             <div className='flex w-120 items-center text-center mt-[18%]'>
               <img src={logo} alt="Logo" className="w-24 h-20 inline" />

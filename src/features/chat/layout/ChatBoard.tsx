@@ -3,6 +3,7 @@
   import { useMessages } from "@features/chat/hooks/useMessage";
   import { UIMessage } from "@/features/chat/types/messageTypes";
   import { useProfile } from "@/features/userProfile/hooks/useProfile";
+  import { useProofread } from "@/features/ai/hooks/useProofread";
   import { useConversation } from "@/features/chat/hooks/useConversation";
   import { Input } from "@/components/ui/Input";
   import { Button } from "@/components/ui/Button";
@@ -12,6 +13,8 @@
   import ChatFilesView from "@/features/chat/components/ChatFilesView";
   import ImageViewer from "@/features/chat/components/ImageViewer";
   import EmptyChatState from "@/features/chat/components/EmptyChatState";
+  import aiIcon from "@/assets/ai-icon.png";
+
 
 
   const Chat: React.FC = () => {
@@ -23,6 +26,7 @@
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const { messages, typingUsers, sendNewMessage, activeChatId, deleteMessage, updateMessage, reactToMessage, emitTypingEvent, } = useMessages();
+    const { corrected, loading, proofread, setCorrected } = useProofread();
 
     const { conversations } = useConversation();
     const { user } = useProfile();
@@ -222,6 +226,26 @@
                 ) : null;
               })}
           </div>
+           {/* Proofread suggestion banner */}
+          {corrected && corrected !== input && (
+            <div className="flex items-center justify-between bg-gray-800 border border-blue-500/40 rounded-lg px-3 py-2 text-sm">
+              <span className="text-gray-300 truncate">{corrected}</span>
+              <div className="flex gap-2 ml-3 shrink-0">
+                <button
+                  onClick={() => { setInput(corrected); setCorrected(null); }}
+                  className="text-xs text-blue-400 hover:text-blue-300 font-medium"
+                >
+                  Use
+                </button>
+                <button
+                  onClick={() => setCorrected(null)}
+                  className="text-xs text-gray-500 hover:text-gray-300"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Input Area */}
           <div className="border-t border-gray-700 p-4 flex flex-col gap-2 bg-gray-900">
@@ -265,8 +289,22 @@
               className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition"
             >
               <Paperclip size={18} className="text-gray-300" />
-            </button>
 
+              
+            </button>
+            {/*  AI Proofread Button */}
+              <button
+                type="button"
+                onClick={() => proofread(input)}
+                disabled={loading || !input.trim()}
+                title="Proofread with AI"
+                className="p-2 rounded-full bg-gray-800 hover:bg-blue-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {loading
+                  ? <span className="text-xs text-gray-400 px-1">...</span>
+                  : <span className="w-5 h-5"><img src={aiIcon} alt="AI" className="w-5 h-5" /></span>
+                }
+              </button>
               <Input
                 type="text"
                 variant="type_input"
@@ -279,7 +317,7 @@
                 onChange={handleInputChange}
                 onKeyDown={handleKeyPress}
               />
-
+              
               {editingMessageId && (
                 <button
                   onClick={cancelEditing}
