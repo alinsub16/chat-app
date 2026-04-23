@@ -23,7 +23,7 @@ const Login = () => {
         });
         setTimeout(() => {
           setModal((m) => ({ ...m, show: false }));
-          navigate("/chatdashboard");
+          navigate("/chat");
         }, 1500);
     } catch (err: any) {
       setModal({

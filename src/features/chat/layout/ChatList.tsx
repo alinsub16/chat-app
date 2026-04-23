@@ -50,7 +50,7 @@ const ChatList = () => {
   
 
   return (
-    <div ref={containerRef} className="w-full max-w-[330px] bg-black text-white overflow-y-auto p-2">
+    <div ref={containerRef} className="w-full max-w-[330px] bg-[#0d1117] text-white overflow-y-auto p-2">
     
     {conversations.map((conv) => {   
     const participants = conv.participants || [];

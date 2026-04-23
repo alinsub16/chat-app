@@ -1,38 +1,40 @@
-import { useState } from "react";
-import { MessageCircle, Video, Users, Calendar, Bell } from "lucide-react";
-import { cn } from "@/lib/utils"; // optional helper if you’re using shadcn or similar
-import logo from "@/assets/logo.png";
-import { url } from "inspector";
+import React from 'react';
+import { MessageCircle, Calendar, Bell } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
+import { ActiveView, MenuItem } from '@/types/sidebarTypes';
 
-const Sidebar = () => {
-  const [active, setActive] = useState("Chat");
+// Typed props interface
+interface SidebarProps {
+  activeView: ActiveView;
+  onNavigate: (view: ActiveView) => void;
+}
 
-  const menu = [
-    { name: "Teams", icon: "/icons/teams.svg" }, // custom logo at top
-    { name: "Chat", icon: <MessageCircle className="w-6 h-6" />, badge: "" },
-    { name: "Calendar", icon: <Calendar className="w-6 h-6" /> },
-    { name: "Notify", icon: <Bell className="w-6 h-6" />, badge: "" },
-  ];
+// Moved outside component — it's a constant, no reason to recreate on each render
+const menu: MenuItem[] = [
+  { name: 'Chat',     icon: <MessageCircle className="w-6 h-6" />},
+  { name: 'Calendar', icon: <Calendar className="w-6 h-6" /> },
+  { name: 'Notify',   icon: <Bell className="w-6 h-6" /> },
+];
 
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
   return (
-    <nav className="flex flex-col items-center bg-primary  w-16 h-screen py-4 space-y-6">
-      {/* Top logo */}
-      <img src={logo} alt="Teams" className="w-20 h-14" />
+    <nav className="flex flex-col items-center bg-primary w-16 h-screen py-4 space-y-6">
+      <img src={logo} alt="Logo" className="w-20 h-14" />
 
-      {/* Menu items */}
       <div className="flex flex-col items-center space-y-10">
-        {menu.slice(1).map((item) => (
+        {menu.map((item) => (
           <button
             key={item.name}
-            onClick={() => setActive(item.name)}
+            onClick={() => onNavigate(item.name)}
             className={cn(
-              "relative flex flex-col items-center text-gray-400 hover:text-indigo-400 transition-colors",
-              active === item.name && "text-indigo-400"
+              'relative flex flex-col items-center text-gray-400 hover:text-indigo-400 transition-colors',
+              activeView === item.name && 'text-indigo-400'
             )}
           >
             <div className="relative">
               {item.icon}
-              {item.badge && (
+              {item.badge !== undefined && (
                 <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-semibold rounded-full px-[5px] py-[1px]">
                   {item.badge}
                 </span>

@@ -1,31 +1,50 @@
-import React from 'react'
-import Sidebar from '@/components/layout/Sidebar'
-import ChatList from '@/features/chat/layout/ChatList'
-import ChatBoard from '@features/chat/layout/ChatBoard'
-import Header from '@/components/layout/Header'
-import ViewUserProfileModal from '@/features/userProfile/components/ViewUserProfileModal'
+import React, { useState } from 'react';
+import Sidebar from '@/components/layout/Sidebar';
+import Header from '@/components/layout/Header';
+import ViewUserProfileModal from '@/features/userProfile/components/ViewUserProfileModal';
+import CalendarPanel from '@/features/calendar/layouts/CalendarPanel';
+import NotificationPanel from '@/features/notifications/layouts/NotificationPanel';
+import ChatPanel from '@/features/chat/layout/ChatPanel';
 
-const ChatDashboard = () => {
+import { ActiveView } from '@/types/sidebarTypes';
+
+
+const ChatDashboard: React.FC = () => {
+  const [activeView, setActiveView] = useState<ActiveView>('Chat');
+
+  const renderMainContent = (): React.ReactNode => {
+    switch (activeView) {
+      case 'Calendar':
+        return <CalendarPanel />;
+      case 'Notify':
+        return <NotificationPanel />;
+      case 'Chat':
+      default:
+        return (
+          <>
+            <ChatPanel />
+          </>
+        );
+    }
+  };
+
   return (
     <div className="h-dvh w-full flex bg-primary-dark overflow-hidden">
-      
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar activeView={activeView} onNavigate={setActiveView} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-
-        {/* Chat Area */}
         <main className="flex flex-1 overflow-hidden">
-          <ChatList />
-          <ChatBoard />
+          {renderMainContent()}
         </main>
       </div>
-      {/* GLOBAL MODAL (IMPORTANT) */}
+
+      {/* GLOBAL MODAL */}
       <ViewUserProfileModal />
     </div>
   );
 };
 
-export default ChatDashboard
+export default ChatDashboard;

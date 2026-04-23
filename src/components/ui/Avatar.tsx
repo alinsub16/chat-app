@@ -31,7 +31,7 @@ const Avatar: React.FC<AvatarProps> = ({ avatar, name, alt, size = 40, className
   return (
     <div
       style={{ width: size, height: size }}
-      className={`rounded-full bg-gray-500 text-white flex items-center justify-center font-semibold ${className}`}
+      className={`rounded-full bg-[#1553ea] text-white flex items-center justify-center font-semibold ${className}`}
     >
       {initials}
     </div>

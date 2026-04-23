@@ -21,7 +21,7 @@ const ChatFilesView: React.FC<Props> = ({ messages }) => {
 
   return (
     <>
-      <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 ">
         {files.map((file, index) => {
           const isImage = file.fileType === "image";
 
@@ -34,7 +34,7 @@ const ChatFilesView: React.FC<Props> = ({ messages }) => {
                 <img
                   src={file.url}
                   alt={file.fileName}
-                  className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition"
+                  className="w-full h-auto object-cover rounded cursor-pointer hover:opacity-90 transition"
                   onClick={() => setSelectedImage(file.url)}
                 />
               ) : (
