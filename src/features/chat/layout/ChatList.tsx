@@ -8,7 +8,11 @@ import ConversationListSkeleton from "@/features/chat/components/ConversationLis
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import { useSocket } from '@features/chat/hooks/useSocket';
 
-const ChatList = () => {
+interface ChatListProps {
+  onConversationSelect?: () => void;
+}
+
+const ChatList = ({ onConversationSelect }: ChatListProps) => {
   const { conversations, loading, removeConversation } = useConversation();
   const { fetchMessages } = useMessages();
   const { user} = useProfile(); 
@@ -41,7 +45,7 @@ const ChatList = () => {
 
   if (!conversations || conversations.length === 0) {
     return (
-      <div className="text-gray-400 text-center mt-6">
+      <div className="text-gray-400 text-center mt-6 w-full max-w-[330px] px-2">
         No conversations yet
       </div>
     );
@@ -50,7 +54,7 @@ const ChatList = () => {
   
 
   return (
-    <div ref={containerRef} className="w-full max-w-[330px] bg-[#0d1117] text-white overflow-y-auto p-2">
+    <div ref={containerRef} className="w-full bg-[#0d1117] text-white overflow-y-auto p-2">
     
     {conversations.map((conv) => {   
     const participants = conv.participants || [];
@@ -83,6 +87,7 @@ const ChatList = () => {
             setOpenMenuId(null);
             setActiveConversationId(conv._id);
             fetchMessages(conv._id);
+            onConversationSelect?.();
           }}
           isOnline={isOnline}
           onDeleteClick={() => handleDeleteConversation(conv._id)} 

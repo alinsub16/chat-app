@@ -15,9 +15,11 @@
   import EmptyChatState from "@/features/chat/components/EmptyChatState";
   import aiIcon from "@/assets/ai-icon.png";
 
+interface ChatBoardProps {
+  onBack?: () => void;
+}
 
-
-  const Chat: React.FC = () => {
+  const Chat: React.FC<ChatBoardProps> = ({ onBack }) => {
     const [input, setInput] = useState("");
     const [files, setFiles] = useState<File[]>([]);
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -150,12 +152,12 @@
       (msg) => msg.conversationId === activeChatId
     );
     if (!activeChatId) {
-  return (
-    <div className="flex flex-1 bg-gray-900">
-      <EmptyChatState />
-    </div>
-  );
-}
+      return (
+        <div className="flex flex-1 bg-gray-900">
+          <EmptyChatState />
+        </div>
+      );
+    }
 
     return (
       <div className="flex flex-col flex-1 bg-gray-900 overflow-hidden">
@@ -164,9 +166,10 @@
           avatarUrl={profilePicture}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onBack={onBack} 
         />
 
-        <div className="flex flex-col flex-1 overflow-hidden px-40">
+        <div className="flex flex-col flex-1 overflow-hidden px-2 xl:px-40 lg:px-30 md:px-10">
           {/* Messages */}
           {activeTab === "chat" ? (
             <div className="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">

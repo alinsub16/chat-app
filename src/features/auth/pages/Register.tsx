@@ -39,7 +39,7 @@ const Register = () => {
 
   return (
     <div>
-      <h2 className="text-white text-xl font-bold mb-4">Create an account</h2>
+      <h2 className="text-gray-600 text-xl font-bold mb-4">Create an account</h2>
       <AuthForm mode="register" onSubmit={handleRegister} isSubmitting={isSubmitting} />
 
       <Modal

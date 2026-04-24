@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import Avatar from "@/components/ui/Avatar";
 import { useConversation } from "@/features/chat/hooks/useConversation";
+import { ChevronLeft } from "lucide-react";
 
 export type ProfileTab = {
   label: string;
@@ -13,8 +14,9 @@ type ProfileHeaderProps = {
   avatarUrl: string;
   tabs?: ProfileTab[];
   defaultTab?: string;
-  activeTab?: string; // controlled mode
+  activeTab?: string; 
   onTabChange?: (tab: string) => void;
+  onBack?: () => void;
 };
 
 const DEFAULT_TABS: ProfileTab[] = [
@@ -29,13 +31,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   defaultTab,
   activeTab: controlledActiveTab,
   onTabChange,
+  onBack,
 }) => {
   const resolvedTabs = useMemo(() => tabs ?? DEFAULT_TABS, [tabs]);
 
   // uncontrolled fallback
-  const [internalTab, setInternalTab] = useState(
-    defaultTab ?? resolvedTabs[0]?.value
-  );
+  const [internalTab, setInternalTab] = useState( defaultTab ?? resolvedTabs[0]?.value );
 
   const { user } = useProfile();
   const { conversations } = useConversation();
@@ -61,6 +62,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   return (
     <div className="flex items-center gap-6 bg-neutral-800 px-6 py-3 text-white">
+      
       {/* Profile */}
       <div className="flex items-center gap-3 min-w-0">
         <Avatar avatar={avatar} name={displayName} className="w-10 h-10"/>
@@ -89,6 +91,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           );
         })}
       </div>
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="md:hidden mr-2"
+        >
+          <ChevronLeft size={22} className="text-gray-300" />
+        </button>
+      )}
     </div>
   );
 };

@@ -18,7 +18,7 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const variants = {
     default:
-      "w-full px-3 py-3 border rounded focus:outline-none focus:ring-2 text-gray-600",
+      "w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 text-gray-600",
     small:
       "w-1/2 px-3 py-3 border rounded focus:outline-none focus:ring-2 text-gray-600",
     type_input:

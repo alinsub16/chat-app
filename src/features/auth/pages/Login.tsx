@@ -39,7 +39,7 @@ const Login = () => {
 
   return (
     <div>
-      <h2 className="text-gray-600 text-xl font-bold mb-4">Login to your account</h2>
+      <h2 className="text-gray-600 text-md font-bold mb-4 md:hidden sm:text-xl">Login to your account</h2>
       <AuthForm mode="login" onSubmit={handleLogin} isSubmitting={isSubmitting} />
       <Modal
         show={modal.show}

@@ -130,7 +130,7 @@ const AuthForm = <T extends Mode>({ mode, onSubmit, isSubmitting, }: AuthFormPro
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-11 text-gray-400 cursor-pointer"
+              className="absolute right-3 top-10 text-gray-400 cursor-pointer"
               >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -211,7 +211,7 @@ const AuthForm = <T extends Mode>({ mode, onSubmit, isSubmitting, }: AuthFormPro
       )}
 
       {/* SUBMIT */}
-      <div className="flex justify-end">
+      <div className="flex justify-center lg:justify-end">
         <Button
           type="submit"
           isLoading={isSubmitting}
