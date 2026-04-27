@@ -1,19 +1,23 @@
   import React, { useState, useRef, useEffect,useLayoutEffect } from "react";
-  import ChatMessage from "@features/chat/components/ChatMessage";
+
   import { useMessages } from "@features/chat/hooks/useMessage";
-  import { UIMessage } from "@/features/chat/types/messageTypes";
   import { useProfile } from "@/features/userProfile/hooks/useProfile";
   import { useProofread } from "@/features/ai/hooks/useProofread";
   import { useConversation } from "@/features/chat/hooks/useConversation";
+
   import { Input } from "@/components/ui/Input";
   import { Button } from "@/components/ui/Button";
   import ProfileHeader from "@/features/chat/layout/ProfileHeader";
   import { Paperclip, X } from "lucide-react";
   import MessageSkeleton from "@/features/chat/components/MessageSkeleton";
+  import ChatLoadingSkeleton from "../components/ChatLoadingSkeleton";
   import ChatFilesView from "@/features/chat/components/ChatFilesView";
   import ImageViewer from "@/features/chat/components/ImageViewer";
   import EmptyChatState from "@/features/chat/components/EmptyChatState";
   import aiIcon from "@/assets/ai-icon.png";
+
+  import { UIMessage } from "@/features/chat/types/messageTypes";
+  import ChatMessage from "@features/chat/components/ChatMessage";
 
 interface ChatBoardProps {
   onBack?: () => void;
@@ -27,8 +31,8 @@ interface ChatBoardProps {
     const [activeTab, setActiveTab] = useState("chat");
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    const { messages, typingUsers, sendNewMessage, activeChatId, deleteMessage, updateMessage, reactToMessage, emitTypingEvent, } = useMessages();
-    const { corrected, loading, proofread, setCorrected } = useProofread();
+    const { messages, typingUsers, sendNewMessage, activeChatId, deleteMessage, updateMessage, reactToMessage, emitTypingEvent,loading: chatLoading } = useMessages();
+    const { corrected, loading:proofreadLoading, proofread, setCorrected } = useProofread();
 
     const { conversations } = useConversation();
     const { user } = useProfile();
@@ -151,13 +155,13 @@ interface ChatBoardProps {
     const messagesForActiveChat = messages.filter(
       (msg) => msg.conversationId === activeChatId
     );
-    if (!activeChatId) {
-      return (
-        <div className="flex flex-1 bg-gray-900">
-          <EmptyChatState />
-        </div>
-      );
-    }
+    // if (!activeChatId) {
+    //   return (
+    //     <div className="flex flex-1 bg-gray-900">
+    //       <EmptyChatState />
+    //     </div>
+    //   );
+    // }
 
     return (
       <div className="flex flex-col flex-1 bg-gray-900 overflow-hidden">
@@ -173,34 +177,43 @@ interface ChatBoardProps {
           {/* Messages */}
           {activeTab === "chat" ? (
             <div className="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">
-              {messagesForActiveChat.map((msg) => {
-                const isOwnMessage = msg.sender?._id === user?._id;
+              {chatLoading ? (
+                <ChatLoadingSkeleton />
+              ) : !activeChatId ? (
+                <EmptyChatState />  
+              ) : (
+                <>
+                  {messagesForActiveChat.map((msg) => {
+                    const isOwnMessage = msg.sender?._id === user?._id;
+                    
+                    const name = !isOwnMessage ? `${msg.sender.firstName} ${msg.sender.lastName}` : "";
+                    
+                    const avatar = !isOwnMessage ? msg.sender?.profilePicture ?? null : null;
 
-                const name = !isOwnMessage
-                  ? `${msg.sender.firstName} ${msg.sender.lastName}`
-                  : "";
+                    return (
+                      <ChatMessage
+                        key={msg._id}
+                        name={name}
+                        avatar={avatar} 
+                        message={msg.content}
+                        sender={isOwnMessage ? "user" : "other"}
+                        timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        attachments={msg.attachments}
+                        reactions={msg.reactions}
+                        onImageClick={(url) => setSelectedImage(url)}
+                        onReact={(emoji) => reactToMessage(msg._id, emoji)}
+                        onDeleteClick={() => deleteMessage(msg._id!)}
+                        onEditClick={() => startEditing(msg)}
+                      />
+                    );
+                  })}
 
-                return (
-                  <ChatMessage
-                    key={msg._id}
-                    name={name}
-                    message={msg.content}
-                    sender={isOwnMessage ? "user" : "other"}
-                    timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                    attachments={msg.attachments}
-                    reactions={msg.reactions}
-                    onImageClick={(url) => setSelectedImage(url)}
-                    onReact={(emoji) => reactToMessage(msg._id, emoji)}
-                    onDeleteClick={() => deleteMessage(msg._id!)}
-                    onEditClick={() => startEditing(msg)}
-                  />
-                );
-              })}
-
-              {isSending && <MessageSkeleton />}
+                  {isSending && <MessageSkeleton />}
+              </>
+            )}
               {selectedImage && (
                 <ImageViewer
                   imageUrl={selectedImage}
@@ -299,11 +312,11 @@ interface ChatBoardProps {
               <button
                 type="button"
                 onClick={() => proofread(input)}
-                disabled={loading || !input.trim()}
+                disabled={proofreadLoading || !input.trim()}
                 title="Proofread with AI"
                 className="p-2 rounded-full bg-gray-800 hover:bg-blue-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {loading
+                {proofreadLoading
                   ? <span className="text-xs text-gray-400 px-1">...</span>
                   : <span className="w-5 h-5"><img src={aiIcon} alt="AI" /></span>
                 }

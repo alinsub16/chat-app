@@ -26,7 +26,6 @@ const DEFAULT_TABS: ProfileTab[] = [
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   name,
-  avatarUrl,
   tabs,
   defaultTab,
   activeTab: controlledActiveTab,

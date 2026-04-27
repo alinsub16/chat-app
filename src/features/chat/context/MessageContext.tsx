@@ -17,7 +17,7 @@ import { ConversationContext } from "@/features/chat/context/ConversationContext
 export interface MessageContextType {
   messages: UIMessage[];
   loading: boolean;
-  activeChatId: string;
+  activeChatId: string | null;
   typingUsers: Record<string, boolean>;
   fetchMessages: (conversationId: string) => Promise<void>;
   sendNewMessage: (payload: SendMessagePayload) => void;
@@ -27,6 +27,7 @@ export interface MessageContextType {
   setActiveChat: (conversationId: string) => void;
   refreshMessages: () => Promise<void>;
   emitTypingEvent: (isTyping: boolean) => void;
+  clearActiveChat: () => void;
 }
 
 export const MessageContext = createContext<MessageContextType | undefined>(
@@ -38,19 +39,10 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeChatId, setActiveChatId] = useState<string>("");
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
 
-  const {
-    joinChat,
-    leaveChat,
-    setupMessageHandlers,
-    sendSocketMessage,
-    emitTyping,
-    deleteMessageSocket,
-    updateMessageSocket,
-    reactMessageSocket,
-  } = useSocket();
+  const { joinChat, leaveChat, setupMessageHandlers, sendSocketMessage, emitTyping, deleteMessageSocket, updateMessageSocket, reactMessageSocket, } = useSocket();
 
   const conversationContext = useContext(ConversationContext);
 
@@ -152,11 +144,6 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
       // Optimistic UI update
       setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
 
-      console.log("Emitting deleteMessage:", {
-        messageId,
-        roomId: activeChatId,
-      });
-
       deleteMessageSocket({
         roomId: activeChatId,
         messageId,
@@ -186,6 +173,21 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeChatId, emitTyping]
   );
 
+  // -----------------------------
+  // Clear activeChatID
+  // -----------------------------
+
+ const clearActiveChat = useCallback(async () => {
+    try {
+      setLoading(true);
+      setMessages([]);
+      setActiveChatId(null);
+    } catch (error) {
+      console.error("Failed to clear active chat:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
 
   // -----------------------------
@@ -288,6 +290,7 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
         setActiveChat: setActiveChatId,
         refreshMessages,
         emitTypingEvent,
+        clearActiveChat
       }}
     >
       {children}

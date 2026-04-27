@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import ChatList from '@/features/chat/layout/ChatList';
 import ChatBoard from '@/features/chat/layout/ChatBoard';
+import { useMessages } from "@features/chat/hooks/useMessage";
 
 const ChatPanel: React.FC = () => {
   const [showChat, setShowChat] = useState(false);
+
+  const { clearActiveChat } = useMessages();
+
+  const handleBack = () => {
+    clearActiveChat();
+    setShowChat(false);
+  };
 
   return (
     <div className="flex flex-1 justify-center overflow-hidden">
@@ -15,7 +23,7 @@ const ChatPanel: React.FC = () => {
 
       {/* RIGHT: Chat Board — hidden on mobile when list is showing */}
       <div className={` md:flex flex-1 flex-col ${showChat ? "flex" : "hidden"}`}>
-        <ChatBoard onBack={() => setShowChat(false)} />
+        <ChatBoard onBack={handleBack} />
       </div>
 
     </div>
