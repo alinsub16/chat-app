@@ -19,10 +19,10 @@ const menu: MenuItem[] = [
 
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
   return (
-    <nav className="flex flex-col items-center bg-primary w-16 h-screen py-4 space-y-6">
-      <img src={logo} alt="Logo" className="w-20 h-14" />
+    <nav className="md:flex-col bg-primary md:max-w-16 md:h-screen md:relative py-4 space-y-6 items-center ">
+      <img src={logo} alt="Logo" className="hidden w-20 h-14 md:block" />
 
-      <div className="flex flex-col items-center space-y-10">
+      <div className="flex md:flex-col items-center justify-evenly md:space-y-10 flex-row w-full">
         {menu.map((item) => (
           <button
             key={item.name}

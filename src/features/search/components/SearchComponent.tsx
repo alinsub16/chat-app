@@ -53,13 +53,13 @@ const UserSearch = () => {
   const showNoUsers = hasSearched && !loading && users.length === 0;
 
   return (
-    <div className="max-w-md mx-auto relative">
+    <div className="sm:max-w-md max-w-[190px] mx-auto relative">
       <Input
         type="text"
         value={query}
         onChange={handleChange}
         placeholder="Search users..."
-        className="w-full border py-1 px-4 rounded-3xl"
+        className=""
         variant="search_input"
       />
 
@@ -80,10 +80,10 @@ const UserSearch = () => {
                 return (
                   <li
                     key={u._id}
-                    className={`flex items-center gap-2 p-2 border-b cursor-pointer hover:bg-gray-800 ${ isCurrentUser ? "cursor-not-allowed opacity-50" : "" }`}
+                    className={`flex items-center gap-2 p-2 border-b cursor-pointer hover:bg-gray-800 text-sm md:text-md ${ isCurrentUser ? "cursor-not-allowed opacity-50" : "" }`}
                     onClick={() => handleUserClick(u._id)}
                   >
-                    <Avatar avatar={u.profilePicture || null} name={fullName} className="w-10 h-10"/>
+                    <Avatar avatar={u.profilePicture || null} name={fullName} className="sm:w-10 sm:h-10 w-7 h-7"/>
                     {u.firstName} {u.lastName} {isCurrentUser && "(Me)"}
                   </li>
                 );

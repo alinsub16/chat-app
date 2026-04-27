@@ -24,7 +24,7 @@ export const Input: React.FC<InputProps> = ({
     type_input:
       "w-full p-2 rounded-lg bg-gray-800 text-white focus:outline-none",
     search_input:
-      "w-full text-gray-400 font-normal focus:outline-none",
+      "text-gray-400 font-normal focus:outline-none border py-1 px-4 rounded-3xl",
   };
 
   const labelStyles = {

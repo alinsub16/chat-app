@@ -305,7 +305,7 @@ interface ChatBoardProps {
               >
                 {loading
                   ? <span className="text-xs text-gray-400 px-1">...</span>
-                  : <span className="w-5 h-5"><img src={aiIcon} alt="AI" className="w-5 h-5" /></span>
+                  : <span className="w-5 h-5"><img src={aiIcon} alt="AI" /></span>
                 }
               </button>
               <Input

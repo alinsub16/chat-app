@@ -29,7 +29,7 @@ const ChatDashboard: React.FC = () => {
   };
 
   return (
-    <div className="h-dvh w-full flex bg-primary-dark overflow-hidden">
+    <div className="h-dvh w-full flex flex-col-reverse md:flex-row bg-primary-dark overflow-hidden">
       {/* Sidebar */}
       <Sidebar activeView={activeView} onNavigate={setActiveView} />
 

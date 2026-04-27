@@ -61,7 +61,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const avatar = otherUser?.profilePicture || null;
 
   return (
-    <div className="flex items-center gap-6 bg-neutral-800 px-6 py-3 text-white">
+    <div className="flex items-center gap-4 bg-neutral-800 px-6 py-3 text-white">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="md:hidden mr-2"
+        > 
+          <ChevronLeft size={22} className="text-gray-300" />
+        </button>
+      )}
       
       {/* Profile */}
       <div className="flex items-center gap-3 min-w-0">
@@ -71,7 +79,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="ml-6 flex gap-6">
+      <div className="ml-2 flex gap-6">
         {resolvedTabs.map((tab) => {
           const isActive = activeTab === tab.value;
 
@@ -91,14 +99,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           );
         })}
       </div>
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="md:hidden mr-2"
-        >
-          <ChevronLeft size={22} className="text-gray-300" />
-        </button>
-      )}
+      
     </div>
   );
 };
