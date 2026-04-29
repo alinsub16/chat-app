@@ -11,7 +11,7 @@ const Header = () => {
     <header className='p-3 flex justify-between items-center'>
         <div>
             <p className='md:block hidden'>Chat</p>
-            <img src={logo} alt="Logo" className="md:hidden w-20 h-14 block" />
+            <img src={logo} alt="Logo" className="md:hidden w-18 h-14 block" />
         </div>
         <div>
             <UserSearch />

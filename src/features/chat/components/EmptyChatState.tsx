@@ -3,7 +3,7 @@ import logo from "@/assets/logo.png";
 
 const EmptyChatState: React.FC = () => {
   return (
-    <div className="flex flex-col w-full items-center justify-center h-full text-center text-gray-400">
+    <div className="flex flex-col w-full items-center h-full justify-center  text-center text-gray-400 overflow-hidden">
       
       <div className="mb-4">
         <img src={logo} alt="Teams" className="w-20 " />

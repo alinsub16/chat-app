@@ -93,7 +93,7 @@ const ProfileContent = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 overflow-y-auto">
+    <div className="md:p-6 px-2 pt-10 space-y-6 overflow-y-auto h-screen">
       {/* PROFILE HEADER */}
       <div className="flex flex-col items-center text-center relative">
         <div className="relative">

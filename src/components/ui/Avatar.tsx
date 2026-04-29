@@ -14,7 +14,7 @@ const Avatar: React.FC<AvatarProps> = ({ avatar, name, alt, size = 40, className
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2); // first letter of first and last name
+    .slice(0, 2); 
 
   if (avatar) {
     return (

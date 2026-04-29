@@ -65,8 +65,6 @@ api.interceptors.response.use(
         // 🔥 AUTO LOGOUT
         localStorage.removeItem("token");
 
-        console.log("🔐 Refresh failed → logging out");
-
         window.location.href = "/";
 
         return Promise.reject(refreshError);

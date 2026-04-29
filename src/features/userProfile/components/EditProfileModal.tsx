@@ -153,7 +153,7 @@ const EditProfileModal: React.FC<Props> = ({ onClose }) => {
   return (
     <>
     
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-2">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-2 chat-scroll px-2">
       {/* Modal Container */}
       <div className="bg-gray-900 w-full max-w-lg h-[85vh] rounded-2xl shadow-xl flex flex-col overflow-hidden">
 

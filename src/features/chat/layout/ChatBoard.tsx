@@ -41,14 +41,34 @@ interface ChatBoardProps {
     const typingTimeout = useRef<NodeJS.Timeout | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const isInitialLoadRef = useRef(true);
+
+    useEffect(() => {
+      isInitialLoadRef.current = true;
+    }, [activeChatId]);
+
     // -------------------------
     // Scroll to bottom
     // -------------------------
     useLayoutEffect(() => {
-    if (activeTab !== "chat") return;
+      if (activeTab !== "chat") return;
 
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, activeChatId, activeTab]);
+      const container = messagesContainerRef.current;
+      if (!container) return;
+
+      requestAnimationFrame(() => {
+        if (isInitialLoadRef.current) {
+          container.scrollTop = container.scrollHeight;
+          isInitialLoadRef.current = false;
+        } else {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      });
+    }, [activeChatId, messages, activeTab]);
 
     // -------------------------
     // Active conversation info
@@ -155,13 +175,13 @@ interface ChatBoardProps {
     const messagesForActiveChat = messages.filter(
       (msg) => msg.conversationId === activeChatId
     );
-    // if (!activeChatId) {
-    //   return (
-    //     <div className="flex flex-1 bg-gray-900">
-    //       <EmptyChatState />
-    //     </div>
-    //   );
-    // }
+    if (!activeChatId) {
+      return (
+        <div className="md:flex flex-1 bg-gray-900 hidden">
+          <EmptyChatState />
+        </div>
+      );
+    }
 
     return (
       <div className="flex flex-col flex-1 bg-gray-900 overflow-hidden">
@@ -176,7 +196,7 @@ interface ChatBoardProps {
         <div className="flex flex-col flex-1 overflow-hidden px-2 xl:px-40 lg:px-30 md:px-10">
           {/* Messages */}
           {activeTab === "chat" ? (
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">
+            <div  ref={messagesContainerRef} className=" flex-1 overflow-y-auto p-6 space-y-4 chat-scroll">
               {chatLoading ? (
                 <ChatLoadingSkeleton />
               ) : !activeChatId ? (
@@ -185,16 +205,18 @@ interface ChatBoardProps {
                 <>
                   {messagesForActiveChat.map((msg) => {
                     const isOwnMessage = msg.sender?._id === user?._id;
+
+                    const otherUser = msg.sender;
                     
                     const name = !isOwnMessage ? `${msg.sender.firstName} ${msg.sender.lastName}` : "";
                     
-                    const avatar = !isOwnMessage ? msg.sender?.profilePicture ?? null : null;
+                    const profilePicture = otherUser.profilePicture || null;
 
                     return (
                       <ChatMessage
                         key={msg._id}
                         name={name}
-                        avatar={avatar} 
+                        avatar={profilePicture} 
                         message={msg.content}
                         sender={isOwnMessage ? "user" : "other"}
                         timestamp={new Date(msg.createdAt).toLocaleTimeString([], {
@@ -318,7 +340,7 @@ interface ChatBoardProps {
               >
                 {proofreadLoading
                   ? <span className="text-xs text-gray-400 px-1">...</span>
-                  : <span className="w-5 h-5"><img src={aiIcon} alt="AI" /></span>
+                  : <span className="w-5 h-5"><img src={aiIcon} className="h-4 w-7 md:w-5" alt="AI" /></span>
                 }
               </button>
               <Input
