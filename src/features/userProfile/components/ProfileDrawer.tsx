@@ -44,7 +44,7 @@ const ProfileDrawer: React.FC<Props> = ({ open, onClose }) => {
 
           <button
             onClick={handleClose}
-            className="p-1 rounded bg-gray-700 cursor-pointer hover:bg-gray-800 transition"
+            className="p-1 rounded bg-gray-700 cursor-pointer hover:bg-gray-800 transition text-white"
           >
             <X size={18} />
           </button>

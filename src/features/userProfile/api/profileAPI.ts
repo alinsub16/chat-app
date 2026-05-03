@@ -26,7 +26,6 @@ export const changePassword = async (currentPassword: string, newPassword: strin
     currentPassword,
     newPassword,
   });
-  console.log("DAATA" ,res)
   return res.data;
 
 };

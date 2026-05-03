@@ -29,19 +29,19 @@ const Footer = ({ version = "", developer = "", appName = "", year = new Date().
 
         {/* Left — version + copyright */}
         <div className="flex sm:flex-row flex-col-reverse items-center sm:gap-3 gap-0">
-          <span className="rounded bg-muted px-2 py-0.5 font-mono sm:text-sm text-xs font-medium tracking-wide text-muted-foreground">
+          <span className="rounded bg-muted px-2 py-0.5 font-mono sm:text-sm text-white text-xs font-medium tracking-wide text-muted-foreground">
             v{version}
           </span>
 
           <div className="sm:h-3.5 h-0 w-px bg-border/30" aria-hidden="true" />
 
-          <p className="sm:text-sm text-xs text-muted-foreground">
+          <p className="sm:text-sm text-xs text-muted-foreground text-white">
             &copy; {year} {appName}. All rights reserved.
           </p>
         </div>
 
         {/* Right — developer credit */}
-        <p className="sm:text-sm text-xs text-muted-foreground/70">
+        <p className="sm:text-sm text-xs text-muted-foreground/70 text-white">
           Developed by:{" "}
           <span className="font-medium text-muted-foreground">{developer}</span>
         </p>

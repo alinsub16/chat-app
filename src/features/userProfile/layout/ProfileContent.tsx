@@ -113,7 +113,7 @@ const ProfileContent = () => {
           {!uploading && (
             <button
               onClick={handlePickImage}
-              className="absolute bottom-0 right-0 bg-gray-800 p-2 rounded-full shadow hover:bg-gray-700 transition"
+              className="absolute bottom-0 right-0 bg-gray-800 p-2 rounded-full shadow hover:bg-gray-700 transition text-white"
             >
               <Camera size={14} />
             </button>
@@ -129,18 +129,18 @@ const ProfileContent = () => {
           disabled={uploading}
         />
 
-        <h2 className="mt-3 text-xl font-semibold">{name}</h2>
+        <h2 className="mt-3 text-xl font-semibold text-white">{name}</h2>
       </div>
 
-      {/* INFO */}
+      {/* INFO */}  
       <div className="bg-gray-900 rounded-xl p-4 space-y-4 shadow-sm relative">
-        <h3 className="text-md font-semibold border-b border-gray-700 pb-2">
+        <h3 className="text-md font-semibold border-b border-gray-700 pb-2 text-white">
           Personal Information
         </h3>
 
         <button
           onClick={() => setOpenEdit(true)}
-          className="absolute right-4 top-3 flex items-center gap-1 text-xs bg-gray-800 px-2 py-1 rounded-md hover:bg-gray-700"
+          className="absolute right-4 top-3 flex items-center gap-1 text-xs bg-gray-800 px-2 py-1 rounded-md hover:bg-gray-700 text-white"
         >
           <Pencil size={14} />
           Edit
@@ -150,7 +150,7 @@ const ProfileContent = () => {
           <Mail size={18} className="text-gray-400" />
           <div>
             <p className="text-xs text-gray-400">Email</p>
-            <p className="text-sm">{user.email || "N/A"}</p>
+            <p className="text-sm text-white">{user.email || "N/A"}</p>
           </div>
         </div>
 
@@ -158,7 +158,7 @@ const ProfileContent = () => {
           <Phone size={18} className="text-gray-400" />
           <div>
             <p className="text-xs text-gray-400">Phone</p>
-            <p className="text-sm">{user.phoneNumber || "N/A"}</p>
+            <p className="text-sm text-white">{user.phoneNumber || "N/A"}</p>
           </div>
         </div>
 
@@ -166,7 +166,7 @@ const ProfileContent = () => {
           <User size={18} className="text-gray-400" />
           <div>
             <p className="text-xs text-gray-400">Full Name</p>
-            <p className="text-sm">{fullName}</p>
+            <p className="text-sm text-white">{fullName}</p>
           </div>
         </div>
       </div>
@@ -174,7 +174,7 @@ const ProfileContent = () => {
       {/* ABOUT (INLINE BIO) */}
       <div className="bg-gray-900 rounded-xl p-4 shadow-sm relative">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-md font-semibold">About</h3>
+          <h3 className="text-md font-semibold text-white">About</h3>
 
           <button
             onClick={

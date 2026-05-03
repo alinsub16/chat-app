@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useProfile } from '@/features/userProfile/hooks/useProfile';
+import { useServerWake } from '@/server/hooks/useServerWake';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -45,11 +46,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const { token } = useAuth();
   const { user } = useProfile();
+  const { serverReady } = useServerWake();
 
-  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://chat-app-server-6wr5.onrender.com";
 
   useEffect(() => {
-    if (!user || !token) {
+    if (!serverReady || !user || !token) {
       if (socket) {
         socket.disconnect();
         setSocket(null);
@@ -59,7 +61,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 
     if (!socket) {
-      console.log('🔌 Connecting to socket server:', SOCKET_URL);
+      // console.log('🔌 Connecting to socket server:', SOCKET_URL);
 
       const newSocket = io(SOCKET_URL, {
         auth: { token },
@@ -73,7 +75,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setSocket(newSocket);
 
       newSocket.on('connect', () => {
-        console.log('✅ Socket connected:', newSocket.id);
+        // console.log('✅ Socket connected:', newSocket.id);
         setIsConnected(true);
         newSocket.emit('getOnlineUsers');
       });
@@ -105,7 +107,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket.off('userOffline');
       }
     };
-  }, [user, token, SOCKET_URL]);
+  }, [user, token, SOCKET_URL, serverReady]);
 
   // Setup message handlers with conversation events
   const setupMessageHandlers = useCallback((
@@ -120,7 +122,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     onConversationDeleted?: (data: any) => void
   ) => {
     if (!socket?.connected) {
-      console.log('Socket not available for setting up handlers');
+      // console.log('Socket not available for setting up handlers');
       return () => {};
     }
 
@@ -163,21 +165,21 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const sendSocketMessage = useCallback((data: any) => {
     if (socket?.connected) {
       socket.emit("sendMessage", data);
-      console.log("🔹 Emitting sendMessage:", data);
+      // console.log("🔹 Emitting sendMessage:", data);
     }
   }, [socket]);
 
   const updateMessageSocket = useCallback((data: any) => {
     if (socket?.connected) {
       socket.emit("updateMessage", data);
-      console.log("✏️ updateMessage:", data);
+      // console.log("✏️ updateMessage:", data);
     }
   }, [socket]);
 
   const deleteMessageSocket = useCallback((data: any) => {
     if (socket?.connected) {
       socket.emit("deleteMessage", data);
-      console.log("🗑 deleteMessage:", data);
+      // console.log("🗑 deleteMessage:", data);
     }
   }, [socket]);
 
@@ -185,14 +187,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   (data: { messageId: string; emoji: string }) => {
     if (socket?.connected) {
       socket.emit("reactMessage", data);
-      console.log("😀 reactMessage:", data);
+      // console.log("😀 reactMessage:", data);
     }
   },
   [socket]
 );
 const disconnect = useCallback(() => {
   if (socket) {
-    console.log("🔌 Manually disconnecting socket");
+    // console.log("🔌 Manually disconnecting socket");
     socket.disconnect();
     setSocket(null);
     setIsConnected(false);

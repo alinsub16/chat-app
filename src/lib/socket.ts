@@ -11,11 +11,11 @@ export const getSocket = (): Socket => {
     });
 
     socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket?.id);
+      // console.log("✅ Socket connected:", socket?.id);
     });
 
     socket.on("disconnect", (reason) => {
-      console.warn("⚠️ Socket disconnected:", reason);
+      // console.warn("⚠️ Socket disconnected:", reason);
     });
   }
 

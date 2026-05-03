@@ -8,8 +8,8 @@ const TestConnection: React.FC = () => {
   useEffect(() => {
     // Test emit after connection
     if (isConnected && socket) {
-      console.log('✅ Connected to:', import.meta.env.VITE_SOCKET_URL);
-      console.log('🔌 Socket ID:', socket.id);
+      // console.log('✅ Connected to:', import.meta.env.VITE_SOCKET_URL);
+      // console.log('🔌 Socket ID:', socket.id);
       
       // Test joining a room
       socket.emit('joinChat', 'test-room');

@@ -59,13 +59,13 @@ const UserProfileMenu = () => {
               setOpen(false);
               setShowProfile(true);
             }}
-            className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-800 rounded-md"
+            className="flex items-center text-white gap-2 w-full px-3 py-2 hover:bg-gray-800 rounded-md"
           >
             <User size={16} />
             <span>Profile</span>
           </button>
 
-          <button className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-800 rounded-md">
+          <button className="flex items-center text-white gap-2 w-full px-3 py-2 hover:bg-gray-800 rounded-md">
             <Settings size={16} />
             <span>Settings</span>
           </button>

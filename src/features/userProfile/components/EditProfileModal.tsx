@@ -159,7 +159,7 @@ const EditProfileModal: React.FC<Props> = ({ onClose }) => {
 
         {/*  Sticky Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <h2 className="text-lg font-semibold">Account Settings</h2>
+          <h2 className="text-lg font-semibold text-white">Account Settings</h2>
           <button
             onClick={onClose}
             className="p-1 rounded bg-gray-700 cursor-pointer hover:bg-gray-800 transition"

@@ -197,7 +197,7 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({
     const cleanup = setupMessageHandlers(
       // receiveMessage
       (msg: UIMessage) => {
-        console.log("RECEIVE EVENT:", msg);
+        // console.log("RECEIVE EVENT:", msg);
 
         if (!msg.content || !msg?.sender) return;
 
