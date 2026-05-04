@@ -18,7 +18,7 @@ const Login = () => {
         setModal({
           show: true,
           title: "Login Successful",
-          message: "Redirecting to dashboard...",
+          message: "Enjoy chatting",
           showButton: false
         });
         setTimeout(() => {

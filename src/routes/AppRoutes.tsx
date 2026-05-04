@@ -19,7 +19,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => {
   return (
-    <Router>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LoginPage />} />
@@ -39,7 +38,6 @@ const AppRoutes = () => {
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
   );
 };
 
