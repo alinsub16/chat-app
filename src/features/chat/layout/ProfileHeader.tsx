@@ -24,21 +24,13 @@ const DEFAULT_TABS: ProfileTab[] = [
   { label: "Files", value: "files" },
 ];
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({
-  name,
-  tabs,
-  defaultTab,
-  activeTab: controlledActiveTab,
-  onTabChange,
-  onBack,
-}) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, tabs, defaultTab, activeTab: controlledActiveTab, onTabChange, onBack, }) => {
   const resolvedTabs = useMemo(() => tabs ?? DEFAULT_TABS, [tabs]);
 
   // uncontrolled fallback
   const [internalTab, setInternalTab] = useState( defaultTab ?? resolvedTabs[0]?.value );
-
   const { user } = useProfile();
-  const { conversations } = useConversation();
+  const { conversations,activeConversation } = useConversation();
 
   const isControlled = controlledActiveTab !== undefined;
   const activeTab = isControlled ? controlledActiveTab : internalTab;
@@ -53,11 +45,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     [isControlled, onTabChange]
   );
 
-  const currentConversation = conversations[0];
-
-  const otherUser = currentConversation?.participants.find((p) => String(p._id) !== String(user?._id));
+  const otherUser = activeConversation?.participants.find((p) => String(p._id) !== String(user?._id))
   const displayName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : "Unknown User";
   const avatar = otherUser?.profilePicture || null;
+
 
   return (
     <div className="flex items-center gap-4 bg-neutral-800 px-6 py-3 text-white">
