@@ -21,7 +21,7 @@ const ServerWakeLoader = () => {
         {/* Text Content */}
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight text-white">
-            Welcome to Chat Circle
+            Welcome to Circles Chat 
           </h1>
 
           <p className="text-sm leading-relaxed text-white/70 max-w-sm mx-auto">
