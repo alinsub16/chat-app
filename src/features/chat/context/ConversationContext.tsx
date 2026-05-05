@@ -129,6 +129,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     );
   };
 
+
   useEffect(() => {
     if (!user || !socket) return;
 

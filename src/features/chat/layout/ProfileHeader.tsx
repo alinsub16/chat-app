@@ -3,6 +3,7 @@ import { useProfile } from "@/features/userProfile/hooks/useProfile";
 import Avatar from "@/components/ui/Avatar";
 import { useConversation } from "@/features/chat/hooks/useConversation";
 import { ChevronLeft } from "lucide-react";
+ import { useMessages } from "@features/chat/hooks/useMessage";
 
 export type ProfileTab = {
   label: string;
@@ -11,7 +12,7 @@ export type ProfileTab = {
 
 type ProfileHeaderProps = {
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   tabs?: ProfileTab[];
   defaultTab?: string;
   activeTab?: string; 
@@ -24,13 +25,11 @@ const DEFAULT_TABS: ProfileTab[] = [
   { label: "Files", value: "files" },
 ];
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, tabs, defaultTab, activeTab: controlledActiveTab, onTabChange, onBack, }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name,avatarUrl,tabs, defaultTab, activeTab: controlledActiveTab, onTabChange, onBack, }) => {
   const resolvedTabs = useMemo(() => tabs ?? DEFAULT_TABS, [tabs]);
 
   // uncontrolled fallback
   const [internalTab, setInternalTab] = useState( defaultTab ?? resolvedTabs[0]?.value );
-  const { user } = useProfile();
-  const { conversations,activeConversation } = useConversation();
 
   const isControlled = controlledActiveTab !== undefined;
   const activeTab = isControlled ? controlledActiveTab : internalTab;
@@ -45,14 +44,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, tabs, defaultTab, a
     [isControlled, onTabChange]
   );
 
-  const otherUser = activeConversation?.participants?.find((p: any) => {
-  const id = typeof p === "string" ? p : p?._id;
-  return String(id) !== String(user?._id);
-  });
 
-const displayName = otherUser ? `${otherUser.firstName ?? ""} ${otherUser.lastName ?? ""}`.trim() : "Unknown User";
-
-const avatar = otherUser?.profilePicture || null;
 
 
   return (
@@ -68,7 +60,7 @@ const avatar = otherUser?.profilePicture || null;
       
       {/* Profile */}
       <div className="flex items-center gap-3 min-w-0">
-        <Avatar avatar={avatar} name={displayName} className="w-10 h-10"/>
+        <Avatar avatar={avatarUrl} name={name} className="w-10 h-10"/>
 
         <span className="text-base font-semibold truncate">{name}</span>
       </div>

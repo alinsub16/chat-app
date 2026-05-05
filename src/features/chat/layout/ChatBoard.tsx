@@ -80,7 +80,7 @@ interface ChatBoardProps {
     );
 
     const headerName = otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : "Unknown User";
-    const profilePicture = otherParticipant?.profilePicture ?? "/avatar.jpg";
+    const profilePicture = otherParticipant?.profilePicture ?? null;
 
     // -------------------------
     // File select
