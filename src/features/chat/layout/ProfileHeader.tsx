@@ -45,9 +45,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, tabs, defaultTab, a
     [isControlled, onTabChange]
   );
 
-  const otherUser = activeConversation?.participants.find((p) => String(p._id) !== String(user?._id))
-  const displayName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : "Unknown User";
-  const avatar = otherUser?.profilePicture || null;
+  const otherUser = activeConversation?.participants?.find((p: any) => {
+  const id = typeof p === "string" ? p : p?._id;
+  return String(id) !== String(user?._id);
+  });
+
+const displayName = otherUser ? `${otherUser.firstName ?? ""} ${otherUser.lastName ?? ""}`.trim() : "Unknown User";
+
+const avatar = otherUser?.profilePicture || null;
 
 
   return (
